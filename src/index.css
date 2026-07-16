@@ -1,1 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap") layer(base);
 @import "tailwindcss";
+
+:root {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1c2321;
+  background-color: #f7f7f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f7f7f4;
+  color: #1c2321;
+}
+
+@layer utilities {
+  .figure {
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ledger-rule {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 27px,
+      #e3e4de 28px
+    );
+  }
+
+  .bg-ledger-bg { background-color: #f7f7f4; }
+  .bg-ledger-surface { background-color: #ffffff; }
+  .bg-ledger-sidebar { background-color: #12181a; }
+  .bg-ledger-sidebarhover { background-color: #1c2426; }
+  .bg-ledger-green { background-color: #0f5132; }
+  .bg-ledger-greenlight { background-color: #e6f0ea; }
+  .bg-ledger-red { background-color: #b3261e; }
+  .bg-ledger-redlight { background-color: #fbeae9; }
+  .bg-ledger-gold { background-color: #b8862b; }
+  .bg-ledger-goldlight { background-color: #faf1e1; }
+
+  .text-ledger-ink { color: #1c2321; }
+  .text-ledger-muted { color: #70766f; }
+  .text-ledger-sidebar { color: #12181a; }
+  .text-ledger-green { color: #0f5132; }
+  .text-ledger-red { color: #b3261e; }
+  .text-ledger-gold { color: #b8862b; }
+  .text-white { color: #ffffff; }
+
+  .border-ledger-border { border-color: #e3e4de; }
+  .border-ledger-green { border-color: #0f5132; }
+
+  .font-display { font-family: "Sora", "sans-serif"; }
+  .font-sans { font-family: "Inter", "sans-serif"; }
+  .font-mono { font-family: "JetBrains Mono", "monospace"; }
+}
