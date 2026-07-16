@@ -1,64 +1,91 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap") layer(base);
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap") layer(base);
 @import "tailwindcss";
 
-:root {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #1c2321;
-  background-color: #f7f7f4;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: #12161c;
+  background-color: #f4f5f1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #f7f7f4;
-  color: #1c2321;
+@layer utilities {
+  .bg-card { background-color: #ffffff; }
+  .bg-paper { background-color: #f4f5f1; }
+  .bg-ink { background-color: #12161c; }
+  .bg-line { background-color: #e3e4dd; }
+  .bg-positive { background-color: #1e7f4e; }
+  .bg-negative { background-color: #b23a2e; }
+  .bg-amber { background-color: #b8860b; }
+
+  .text-ink { color: #12161c; }
+  .text-muted { color: #6b6f76; }
+  .text-white { color: #ffffff; }
+  .text-positive { color: #1e7f4e; }
+  .text-negative { color: #b23a2e; }
+  .text-amber { color: #b8860b; }
+
+  .border-line { border-color: #e3e4dd; }
+  .border-ink { border-color: #12161c; }
+
+  .font-display { font-family: "Space Grotesk", sans-serif; }
+  .font-mono { font-family: "IBM Plex Mono", monospace; }
+
+  .shadow-card { box-shadow: 0 1px 2px rgba(18, 22, 28, 0.04), 0 1px 8px rgba(18, 22, 28, 0.04); }
+  .shadow-panel { box-shadow: 0 4px 24px rgba(18, 22, 28, 0.06); }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  .ledger-stitch {
+    background-image: repeating-linear-gradient(
+      90deg,
+      #d8d9d1 0,
+      #d8d9d1 5px,
+      transparent 5px,
+      transparent 11px
+    );
+    height: 1px;
+  }
+
+  .animate-rise {
+    animation: rise 0.4s ease both;
+  }
 }
 
-@layer utilities {
-  .figure {
-    font-family: "JetBrains Mono", monospace;
-    font-variant-numeric: tabular-nums;
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
-
-  .ledger-rule {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 27px,
-      #e3e4de 28px
-    );
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .bg-ledger-bg { background-color: #f7f7f4; }
-  .bg-ledger-surface { background-color: #ffffff; }
-  .bg-ledger-sidebar { background-color: #12181a; }
-  .bg-ledger-sidebarhover { background-color: #1c2426; }
-  .bg-ledger-green { background-color: #0f5132; }
-  .bg-ledger-greenlight { background-color: #e6f0ea; }
-  .bg-ledger-red { background-color: #b3261e; }
-  .bg-ledger-redlight { background-color: #fbeae9; }
-  .bg-ledger-gold { background-color: #b8862b; }
-  .bg-ledger-goldlight { background-color: #faf1e1; }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 
-  .text-ledger-ink { color: #1c2321; }
-  .text-ledger-muted { color: #70766f; }
-  .text-ledger-sidebar { color: #12181a; }
-  .text-ledger-green { color: #0f5132; }
-  .text-ledger-red { color: #b3261e; }
-  .text-ledger-gold { color: #b8862b; }
-  .text-white { color: #ffffff; }
+::-webkit-scrollbar-thumb {
+  background: #d8d9d1;
+  border-radius: 8px;
+}
 
-  .border-ledger-border { border-color: #e3e4de; }
-  .border-ledger-green { border-color: #0f5132; }
-
-  .font-display { font-family: "Sora", "sans-serif"; }
-  .font-sans { font-family: "Inter", "sans-serif"; }
-  .font-mono { font-family: "JetBrains Mono", "monospace"; }
+::-webkit-scrollbar-track {
+  background: transparent;
 }

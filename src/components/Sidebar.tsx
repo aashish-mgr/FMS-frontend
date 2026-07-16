@@ -1,62 +1,75 @@
+import type { ComponentType } from 'react'
 import {
-  LayoutDashboard,
-  ArrowLeftRight,
-  PieChart,
+  LayoutGrid,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  FileBarChart2,
   BellRing,
   StickyNote,
-  Paperclip,
-  Settings,
-  BookOpenText,
-  type LucideIcon,
-} from "lucide-react";
+  BookOpen,
+  LogOut
+} from 'lucide-react'
 
 interface NavItem {
-  label: string;
-  icon: LucideIcon;
-  active?: boolean;
+  icon: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
+  label: string
+  active?: boolean
+  badge?: number
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "Transactions", icon: ArrowLeftRight },
-  { label: "Reports", icon: PieChart },
-  { label: "Reminders", icon: BellRing },
-  { label: "Notes", icon: StickyNote },
-  { label: "Attachments", icon: Paperclip },
-];
+  { icon: LayoutGrid, label: 'Dashboard', active: true },
+  { icon: ArrowDownCircle, label: 'Income' },
+  { icon: ArrowUpCircle, label: 'Expense' },
+  { icon: FileBarChart2, label: 'Reports' },
+  { icon: BellRing, label: 'Reminders', badge: 7 },
+  { icon: StickyNote, label: 'Notes' }
+]
 
 export default function Sidebar() {
   return (
-    <aside className="hidden md:flex md:flex-col md:w-60 shrink-0 bg-ledger-sidebar text-white min-h-screen py-6 px-4">
-      <div className="flex items-center gap-2 px-2 mb-10">
-        <div className="h-8 w-8 rounded-md bg-ledger-green flex items-center justify-center">
-          <BookOpenText size={17} strokeWidth={2} className="text-white" />
+    <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-ink text-white/90 min-h-screen sticky top-0">
+      <div className="flex items-center gap-2.5 px-6 py-6">
+        <div className="grid place-items-center w-9 h-9 rounded-md bg-indigo/90">
+          <BookOpen size={18} strokeWidth={2} className="text-white" />
         </div>
-        <span className="font-display font-semibold text-lg tracking-tight">
-          Ledgerly
-        </span>
+        <div className="leading-tight">
+          <p className="font-display font-semibold text-[15px] text-white">Digital Pathshala</p>
+          <p className="text-[11px] tracking-wide text-white/45 uppercase">Finance System</p>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1">
-        {navItems.map(({ label, icon: Icon, active }) => (
+      <div className="ledger-stitch mx-6 opacity-20" />
+
+      <nav className="flex-1 px-3 mt-4 space-y-0.5">
+        {navItems.map(({ icon: Icon, label, active, badge }) => (
           <button
             key={label}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
               active
-                ? "bg-ledger-green text-white font-medium"
-                : "text-white hover:bg-ledger-sidebarhover"
+                ? 'bg-white/10 text-white font-medium'
+                : 'text-white/60 hover:bg-white/5 hover:text-white/90'
             }`}
           >
             <Icon size={17} strokeWidth={2} />
-            {label}
+            <span className="flex-1 text-left">{label}</span>
+            {badge ? (
+              <span className="text-[10px] font-mono font-medium bg-amber/90 text-ink rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                {badge}
+              </span>
+            ) : null}
           </button>
         ))}
       </nav>
 
-      <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white hover:bg-ledger-sidebarhover transition-colors">
-        <Settings size={17} strokeWidth={2} />
-        Settings
-      </button>
+      <div className="px-3 pb-5">
+        <div className="ledger-stitch opacity-20 mb-4 mx-3" />
+        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:bg-white/5 hover:text-white/80 transition-colors">
+          <LogOut size={17} strokeWidth={2} />
+          <span>Log out</span>
+        </button>
+        <p className="px-3 pt-3 text-[10px] text-white/25 font-mono">v1.0 · Accountant role</p>
+      </div>
     </aside>
-  );
+  )
 }
