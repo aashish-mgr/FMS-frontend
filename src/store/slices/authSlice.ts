@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import { API } from "../api";
+import authApi from "../api/authApi";
+import type{ loginData } from "../api/authApi";
 
 interface AuthUser {
   id: string;
@@ -15,10 +17,6 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-interface LoginData {
-   userEmail: string;
-   userPassword: string
-}
 
 const initialState: AuthState = {
   user: null,
@@ -30,10 +28,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthCredentials: (state, action: PayloadAction<{ user: AuthUser }>) => {
+    setAuthCredentials: (state, action: PayloadAction<{ user: AuthUser | null} >) => {
       state.user = action.payload?.user;
     },
-    setAccessToken: (state, action: PayloadAction<string>) => {
+    setAccessToken: (state, action: PayloadAction<string | null>) => {
       state.accessToken = action.payload;
     },
     setIsAuthenticated: (state,action: PayloadAction<boolean>)  => {
@@ -46,10 +44,10 @@ const authSlice = createSlice({
   },
 });
 
-export const loginUser = (userData: LoginData) => {
-  return async function loginUserThunk(dispatch: any) {
+export const loginUser = (userData: loginData) => {
+  return async function loginUserThunk(dispatch: Dispatch) {
       try {
-        const res = await API.post("/auth/login",userData);
+        const res = await authApi.login(userData)
         if(res.status === 200){
           dispatch(setAuthCredentials(res.data?.user));
           dispatch(setAccessToken(res.data?.accessToken));
@@ -62,6 +60,30 @@ export const loginUser = (userData: LoginData) => {
       catch(err) {
         alert("login failed");
         console.error(err);
+      }
+  }
+}
+
+
+export const logout = ()=> {
+  return async function logoutThunk(dispatch:Dispatch) {
+      try {
+        const res = await authApi.logout();
+        if(res.status === 200){
+           dispatch(setAuthCredentials({user: null}));
+           dispatch(setAccessToken(null));
+           dispatch(setIsAuthenticated(false));
+           return 1;
+        }
+        else {
+            alert("logout failed");
+            return 0;
+        }
+      }
+      catch(err) {
+        alert("logout failed");
+        console.error(err);
+        return false;
       }
   }
 }

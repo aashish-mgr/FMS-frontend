@@ -9,7 +9,8 @@ import {
   BookOpen,
   LogOut
 } from 'lucide-react'
-
+import { logout } from '../store/slices/authSlice'
+import { useNavigate } from 'react-router-dom';
 interface NavItem {
   icon: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
   label: string
@@ -25,6 +26,12 @@ const navItems: NavItem[] = [
   { icon: BellRing, label: 'Reminders', badge: 7 },
   { icon: StickyNote, label: 'Notes' }
 ]
+const navigate = useNavigate();
+const handleLogout =async () => {
+   logout();
+  navigate("/");
+
+}
 
 export default function Sidebar() {
   return (
@@ -64,7 +71,7 @@ export default function Sidebar() {
 
       <div className="px-3 pb-5">
         <div className="ledger-stitch opacity-20 mb-4 mx-3" />
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:bg-white/5 hover:text-white/80 transition-colors">
+        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:bg-white/5 hover:text-white/80 transition-colors">
           <LogOut size={17} strokeWidth={2} />
           <span>Log out</span>
         </button>

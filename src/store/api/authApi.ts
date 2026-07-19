@@ -1,6 +1,6 @@
 import { API} from "./index";
 
-interface loginData {
+export interface loginData {
     userEmail: string,
     userPassword: string
 }

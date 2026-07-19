@@ -8,28 +8,16 @@ import RecentTransactions from "../../components/RecentTransactions";
 import UpcomingReminders from "../../components/UpcomingReminders";
 import { incomeByCategory, expenseByCategory } from "../../data/dummyData";
 import { useEffect } from "react";
-import authApi from "../../store/api/authApi";
+import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import {
-  setAuthCredentials,
-  setAccessToken,
-} from "../../store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  useEffect(() => {
-    const loginUser = async () => {
-      const res = await authApi.login({
-        userEmail: "admin@gmail.com",
-        userPassword: "admin123",
-      });
-      dispatch(setAuthCredentials(res.data?.user));
-      dispatch(setAccessToken(res.data?.accessToken));
-      console.log(res);
-    };
 
-    loginUser();
-  }, []);
+
+  
+ 
   return (
     <div className="flex min-h-screen bg-paper">
       <Sidebar />
