@@ -1,5 +1,7 @@
 import { Search, Menu } from 'lucide-react'
 import { currentUser } from '../data/dummyData'
+import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
 
 const today = new Date('2026-07-14T00:00:00').toLocaleDateString('en-GB', {
   weekday: 'long',
@@ -9,11 +11,16 @@ const today = new Date('2026-07-14T00:00:00').toLocaleDateString('en-GB', {
 })
 
 export default function Topbar() {
+  const authState = useSelector((state: any)  => state.auth);
+  // const currentUser= authState?.user;
   const initials = currentUser.full_name
     .split(' ')
-    .map((n) => n[0])
+    .map((n: any) => n[0])
     .join('')
 
+    useEffect(() => {
+      console.log(authState)
+    }, [])
   return (
     <header className="sticky top-0 z-10 bg-paper/90 backdrop-blur border-b border-line">
       <div className="flex items-center justify-between gap-4 px-5 lg:px-8 py-4">

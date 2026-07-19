@@ -1,14 +1,35 @@
-import Sidebar from '../../components/Sidebar'
-import Topbar from '../../components/Topbar'
-import KpiSection from '../../components/KpiSection'
-import IncomeExpenseChart from '../../components/IncomeExpenseChart'
-import CategoryDonut from '../../components/CategoryDonut'
-import CashFlowChart from '../../components/CashFlowChart'
-import RecentTransactions from '../../components/RecentTransactions'
-import UpcomingReminders from '../../components/UpcomingReminders'
-import { incomeByCategory, expenseByCategory } from '../../data/dummyData'
+import Sidebar from "../../components/Sidebar";
+import Topbar from "../../components/Topbar";
+import KpiSection from "../../components/KpiSection";
+import IncomeExpenseChart from "../../components/IncomeExpenseChart";
+import CategoryDonut from "../../components/CategoryDonut";
+import CashFlowChart from "../../components/CashFlowChart";
+import RecentTransactions from "../../components/RecentTransactions";
+import UpcomingReminders from "../../components/UpcomingReminders";
+import { incomeByCategory, expenseByCategory } from "../../data/dummyData";
+import { useEffect } from "react";
+import authApi from "../../store/api/authApi";
+import { useDispatch } from "react-redux";
+import {
+  setAuthCredentials,
+  setAccessToken,
+} from "../../store/slices/authSlice";
 
 export default function Dashboard() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const loginUser = async () => {
+      const res = await authApi.login({
+        userEmail: "admin@gmail.com",
+        userPassword: "admin123",
+      });
+      dispatch(setAuthCredentials(res.data?.user));
+      dispatch(setAccessToken(res.data?.accessToken));
+      console.log(res);
+    };
+
+    loginUser();
+  }, []);
   return (
     <div className="flex min-h-screen bg-paper">
       <Sidebar />
@@ -52,5 +73,5 @@ export default function Dashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }

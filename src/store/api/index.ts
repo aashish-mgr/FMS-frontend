@@ -1,9 +1,8 @@
 import axios from 'axios';
 import store from '../index';
 import { setAccessToken } from '../slices/authSlice';
-import { useDispatch } from 'react-redux';
 
-const dispatch = useDispatch();
+
 
 
 const API = axios.create({
@@ -32,7 +31,7 @@ API.interceptors.response.use(
 
             const res = await API.post("/auth/refresh");
 
-            dispatch(setAccessToken(res.data?.accessToken))
+            store.dispatch(setAccessToken(res.data?.accessToken))
 
             error.config.headers.Authorization =
                 `Bearer ${res.data.accessToken}`;

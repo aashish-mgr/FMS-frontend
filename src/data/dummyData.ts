@@ -13,8 +13,8 @@ import type {
 // In production this is replaced by calls to /api/v1/dashboard/* per Section 6.4.
 
 export const currentUser: CurrentUser = {
-  full_name: 'Sujata Karki',
-  email: 'sujata.karki@digitalpathshalanepal.com',
+  full_name: 'Aashish Magar',
+  email: 'aashish@gmail.com',
   role: 'Accountant'
 }
 
