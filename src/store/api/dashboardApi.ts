@@ -1,12 +1,13 @@
 import { API } from "./index";
+import type { BarRange } from "../../types/dashboardTypes";
 
 class dashboardApi {
     async getKpis() {
         return API.get("/dashboard/kpis");
     }
 
-    async getIncomeExpenseChart () {
-        return API.get("/dashboard/income-expense-chart")
+    async getIncomeExpenseChart (period: BarRange ) {
+        return API.get(`/dashboard/income-expense-chart?period=${period}`)
     }
 
      async getIncomeByCategory () {

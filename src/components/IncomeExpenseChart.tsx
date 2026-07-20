@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { barChartData, npr } from '../data/dummyData'
 import type { BarRange } from '../types/dashboardTypes'
+import dashboardApi from '../store/api/dashboardApi'
 
 const toggles: { key: BarRange; label: string }[] = [
   { key: 'daily', label: 'Daily' },
@@ -44,7 +45,19 @@ function CustomTooltip({ active, payload, label }:CustomTooltipProps) {
 
 export default function IncomeExpenseChart() {
   const [range, setRange] = useState<BarRange>('monthly')
-  const data = barChartData[range]
+  // const data = barChartData[range];
+  const [data, setData] = useState([])
+
+  const getBarData =async () => {
+    const res = await dashboardApi.getIncomeExpenseChart(range);
+    console.log(res);
+    setData(res.data?.data)
+  }
+
+  useEffect(() => {
+     getBarData();
+  }, [,range])
+  
 
   return (
     <div className="bg-card rounded-xl border border-line shadow-card p-5 animate-rise">
