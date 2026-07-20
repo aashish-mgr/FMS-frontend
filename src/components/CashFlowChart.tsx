@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import type { TooltipProps } from 'recharts'
 import { cashFlowByYear, npr } from '../data/dummyData'
+import dashboardApi from '../store/api/dashboardApi'
 
-const years = Object.keys(cashFlowByYear).sort((a, b) => Number(b) - Number(a))
+const years = ['2026','2025']
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
   payload?: Array<{
@@ -35,8 +36,21 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 export default function CashFlowChart() {
   const [year, setYear] = useState<string>(years[0])
-  const data = cashFlowByYear[year]
+  // const data = cashFlowByYear[year]
+  const [data, setData] = useState([])
 
+  const getCashFlow = async() => {
+     const res = await dashboardApi.getCashFlow(Number(year));
+     console.log(res);
+     console.log(years)
+     setData(res.data?.data);
+  }
+  
+  useEffect(() => {
+    getCashFlow();
+
+  }, [year])
+  
   return (
     <div className="bg-card rounded-xl border border-line shadow-card p-5 animate-rise">
       <div className="flex items-start justify-between mb-1">

@@ -17,8 +17,8 @@ class dashboardApi {
         return API.get("/dashboard/expense-by-category");
     }
    
-    async  getCashFlow () {
-        return API.get("/dashboard/cash-flow");
+    async  getCashFlow (year: number) {
+        return API.get(`/dashboard/cash-flow/${year}`);
     }
 
     async getRecentTransactions () {

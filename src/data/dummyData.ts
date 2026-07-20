@@ -128,13 +128,13 @@ export const expenseByCategory: CategoryDatum[] = [
 
 // ---------- 6.2 Monthly Cash Flow (line chart, year selector) ----------
 export const cashFlowByYear: CashFlowByYear = {
-  2025: barChartData.monthly.map((m) => ({
+  2026: barChartData.monthly.map((m) => ({
     label: m.label,
     income: m.income,
     expense: m.expense,
     profit: m.income - m.expense
   })),
-  2024: [
+  2025: [
     { label: 'Jan', income: 1620400, expense: 1080200 },
     { label: 'Feb', income: 1712300, expense: 1145600 },
     { label: 'Mar', income: 1893700, expense: 1220300 },
