@@ -152,26 +152,26 @@ export const cashFlowByYear: CashFlowByYear = {
 
 // ---------- 6.3 Recent Transactions widget ----------
 export const recentTransactions: Transaction[] = [
-  { id: 'txn-001', entity_type: 'income', date: '2026-07-14', category: 'Software Development', party: 'Himal Traders Pvt. Ltd.', method: 'Bank Transfer', amount: 84500 },
-  { id: 'txn-002', entity_type: 'expense', date: '2026-07-14', category: 'Internet', party: 'WorldLink Communications', method: 'eSewa', amount: 4200 },
-  { id: 'txn-003', entity_type: 'expense', date: '2026-07-13', category: 'Freelancer Payment', party: 'Anish Shrestha', method: 'Bank Transfer', amount: 27000 },
-  { id: 'txn-004', entity_type: 'income', date: '2026-07-13', category: 'Corporate Training', party: 'Nabil Bank Ltd.', method: 'Cheque', amount: 118400 },
-  { id: 'txn-005', entity_type: 'income', date: '2026-07-12', category: 'AMC / Maintenance', party: 'Kathmandu Metropolitan Office', method: 'Bank Transfer', amount: 45300 },
-  { id: 'txn-006', entity_type: 'expense', date: '2026-07-12', category: 'Google Ads', party: 'Google Ireland Ltd.', method: 'Khalti', amount: 18600 },
-  { id: 'txn-007', entity_type: 'expense', date: '2026-07-11', category: 'Office Supplies', party: 'Bhatbhateni Supermarket', method: 'Cash', amount: 3150 },
-  { id: 'txn-008', entity_type: 'income', date: '2026-07-11', category: 'Website Development', party: 'Everest Herbs Pvt. Ltd.', method: 'eSewa', amount: 62000 },
-  { id: 'txn-009', entity_type: 'income', date: '2026-07-10', category: 'Online Class', party: 'Batch #DP-114 Students', method: 'Khalti', amount: 39800 },
-  { id: 'txn-010', entity_type: 'expense', date: '2026-07-10', category: 'Salary', party: 'Payroll — July (Partial)', method: 'Bank Transfer', amount: 412000 },
-  { id: 'txn-011', entity_type: 'expense', date: '2026-07-09', category: 'Server', party: 'DigitalOcean LLC', method: 'Bank Transfer', amount: 15400 },
-  { id: 'txn-012', entity_type: 'income', date: '2026-07-09', category: 'Government Project', party: 'Dept. of IT, GoN', method: 'Bank Transfer', amount: 218500 },
-  { id: 'txn-013', entity_type: 'expense', date: '2026-07-08', category: 'Rent', party: 'Radisson Business Suites', method: 'Bank Transfer', amount: 95000 },
-  { id: 'txn-014', entity_type: 'income', date: '2026-07-08', category: 'Mobile App Development', party: 'Sajilo Yatra Pvt. Ltd.', method: 'Cheque', amount: 156200 },
-  { id: 'txn-015', entity_type: 'expense', date: '2026-07-07', category: 'Software Subscription', party: 'Figma Inc.', method: 'Khalti', amount: 8900 },
-  { id: 'txn-016', entity_type: 'income', date: '2026-07-07', category: 'Physical Class', party: 'Batch #DP-109 Students', method: 'Cash', amount: 28400 },
-  { id: 'txn-017', entity_type: 'expense', date: '2026-07-06', category: 'Fuel', party: 'Nepal Oil Corporation', method: 'Cash', amount: 6200 },
-  { id: 'txn-018', entity_type: 'income', date: '2026-07-06', category: 'Consultancy', party: 'Yeti Airlines Domestic', method: 'Bank Transfer', amount: 74600 },
-  { id: 'txn-019', entity_type: 'expense', date: '2026-07-05', category: 'Bank Charges', party: 'Nepal Investment Mega Bank', method: 'Bank Transfer', amount: 1250 },
-  { id: 'txn-020', entity_type: 'income', date: '2026-07-05', category: 'Hosting Services', party: 'Recurring — 42 clients', method: 'eSewa', amount: 31900 }
+  { id: 'txn-001', type: 'income', date: '2026-07-14', category: 'Software Development', party: 'Himal Traders Pvt. Ltd.', amount: 84500 },
+  { id: 'txn-002', type: 'expense', date: '2026-07-14', category: 'Internet', party: 'WorldLink Communications', amount: 4200 },
+  { id: 'txn-003', type: 'expense', date: '2026-07-13', category: 'Freelancer Payment', party: 'Anish Shrestha',  amount: 27000 },
+  { id: 'txn-004', type: 'income', date: '2026-07-13', category: 'Corporate Training', party: 'Nabil Bank Ltd.',amount: 118400 },
+  { id: 'txn-005', type: 'income', date: '2026-07-12', category: 'AMC / Maintenance', party: 'Kathmandu Metropolitan Office',  amount: 45300 },
+  { id: 'txn-006', type: 'expense', date: '2026-07-12', category: 'Google Ads', party: 'Google Ireland Ltd.', amount: 18600 },
+  { id: 'txn-007', type: 'expense', date: '2026-07-11', category: 'Office Supplies', party: 'Bhatbhateni Supermarke', amount: 3150 },
+  { id: 'txn-008', type: 'income', date: '2026-07-11', category: 'Website Development', party: 'Everest Herbs Pvt. Ltd.', amount: 62000 },
+  { id: 'txn-009', type: 'income', date: '2026-07-10', category: 'Online Class', party: 'Batch #DP-114 Students', amount: 39800 },
+  { id: 'txn-010', type: 'expense', date: '2026-07-10', category: 'Salary', party: 'Payroll — July (Partial)',  amount: 412000 },
+  { id: 'txn-011', type: 'expense', date: '2026-07-09', category: 'Server', party: 'DigitalOcean LLC', amount: 15400 },
+  { id: 'txn-012', type: 'income', date: '2026-07-09', category: 'Government Project', party: 'Dept. of IT, GoN', amount: 218500 },
+  { id: 'txn-013', type: 'expense', date: '2026-07-08', category: 'Rent', party: 'Radisson Business Suites', amount: 95000 },
+  { id: 'txn-014', type: 'income', date: '2026-07-08', category: 'Mobile App Development', party: 'Sajilo Yatra Pvt. Ltd.',  amount: 156200 },
+  { id: 'txn-015', type: 'expense', date: '2026-07-07', category: 'Software Subscription', party: 'Figma Inc.', amount: 8900 },
+  { id: 'txn-016', type: 'income', date: '2026-07-07', category: 'Physical Class', party: 'Batch #DP-109 Students',  amount: 28400 },
+  { id: 'txn-017', type: 'expense', date: '2026-07-06', category: 'Fuel', party: 'Nepal Oil Corporation', amount: 6200 },
+  { id: 'txn-018', type: 'income', date: '2026-07-06', category: 'Consultancy', party: 'Yeti Airlines Domestic', amount: 74600 },
+  { id: 'txn-019', type: 'expense', date: '2026-07-05', category: 'Bank Charges', party: 'Nepal Investment Mega Bank', amount: 1250 },
+  { id: 'txn-020', type: 'income', date: '2026-07-05', category: 'Hosting Services', party: 'Recurring — 42 clients',  amount: 31900 }
 ]
 
 // ---------- 6.3 Upcoming Reminders widget ----------

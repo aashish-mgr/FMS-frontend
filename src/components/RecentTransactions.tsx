@@ -1,8 +1,21 @@
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { recentTransactions, npr } from '../data/dummyData'
 import { formatDate } from '../lib/format'
+import dashboardApi from '../store/api/dashboardApi'
+import { useEffect, useState } from 'react'
+import type { Transaction } from '../types/dashboardTypes'
 
 export default function RecentTransactions() {
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const getRecentTransactions = async () => {
+     const res = await dashboardApi.getRecentTransactions();
+     console.log(res);
+     setRecentTransactions(res.data?.data);
+  }
+  useEffect(() => {
+    getRecentTransactions();
+  }, [])
+  
   return (
     <div className="bg-card rounded-xl border border-line shadow-card animate-rise">
       <div className="flex items-center justify-between px-5 py-4 border-b border-line">
@@ -19,14 +32,13 @@ export default function RecentTransactions() {
             <tr className="text-left text-[11px] uppercase tracking-wide text-muted">
               <th className="px-5 py-2.5 font-medium">Party</th>
               <th className="px-3 py-2.5 font-medium">Category</th>
-              <th className="px-3 py-2.5 font-medium">Method</th>
               <th className="px-3 py-2.5 font-medium">Date</th>
               <th className="px-5 py-2.5 font-medium text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
-            {recentTransactions.slice(0, 10).map((t) => {
-              const isIncome = t.entity_type === 'income'
+            {recentTransactions?.slice(0, 10).map((t) => {
+              const isIncome = t.type === 'income'
               return (
                 <tr key={t.id} className="border-t border-line hover:bg-paper/70 transition-colors">
                   <td className="px-5 py-3">
@@ -42,8 +54,7 @@ export default function RecentTransactions() {
                     </div>
                   </td>
                   <td className="px-3 py-3 text-muted whitespace-nowrap">{t.category}</td>
-                  <td className="px-3 py-3 text-muted whitespace-nowrap">{t.method}</td>
-                  <td className="px-3 py-3 text-muted font-mono tabular whitespace-nowrap">{formatDate(t.date)}</td>
+                  <td className="px-3 py-3 text-muted font-mono tabular whitespace-nowrap">{formatDate(t.date.slice(0,10))}</td>
                   <td className={`px-5 py-3 text-right font-mono tabular font-medium whitespace-nowrap ${isIncome ? 'text-positive' : 'text-negative'}`}>
                     {isIncome ? '+' : '-'}
                     {npr(t.amount)}
