@@ -1,7 +1,7 @@
 import { Check, Repeat } from 'lucide-react'
 import { upcomingReminders } from '../data/dummyData'
 import { formatDate, dueLabel } from '../lib/format'
-import type { Priority } from '../types/types'
+import type { Priority } from '../types/dashboardTypes'
 
 const priorityStyle: Record<Priority, string> = {
   HIGH: 'bg-negative-soft text-negative',

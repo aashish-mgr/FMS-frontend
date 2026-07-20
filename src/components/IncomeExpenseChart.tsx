@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { barChartData, npr } from '../data/dummyData'
-import type { BarRange } from '../types/types'
+import type { BarRange } from '../types/dashboardTypes'
 
 const toggles: { key: BarRange; label: string }[] = [
   { key: 'daily', label: 'Daily' },

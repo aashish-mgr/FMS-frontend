@@ -7,17 +7,8 @@ import CashFlowChart from "../../components/CashFlowChart";
 import RecentTransactions from "../../components/RecentTransactions";
 import UpcomingReminders from "../../components/UpcomingReminders";
 import { incomeByCategory, expenseByCategory } from "../../data/dummyData";
-import { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const dispatch = useDispatch();
-
-
-  
- 
   return (
     <div className="flex min-h-screen bg-paper">
       <Sidebar />

@@ -1,14 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
-import { API } from "../api";
-import authApi from "../api/authApi";
-import type{ loginData } from "../api/authApi";
+import type { loginData } from "../api/authApi";
 
 interface AuthUser {
   id: string;
   userName: string;
   userEmail: string;
-  roles: string[] | null;
+  role?: string | null;
 }
 
 interface AuthState {
@@ -28,8 +26,13 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthCredentials: (state, action: PayloadAction<{ user: AuthUser | null} >) => {
-      state.user = action.payload?.user;
+    setAuthCredentials: (state, action: PayloadAction<AuthUser | null >) => {
+      state.user = action.payload;
+    },
+    setRole: (state, action: PayloadAction<string | null>) => {
+      if (state.user) {
+        state.user.role = action.payload;
+      }
     },
     setAccessToken: (state, action: PayloadAction<string | null>) => {
       state.accessToken = action.payload;
@@ -47,10 +50,13 @@ const authSlice = createSlice({
 export const loginUser = (userData: loginData) => {
   return async function loginUserThunk(dispatch: Dispatch) {
       try {
+        const authApi = (await import("../api/authApi")).default;
         const res = await authApi.login(userData)
+        console.log(res);
         if(res.status === 200){
-          dispatch(setAuthCredentials(res.data?.user));
-          dispatch(setAccessToken(res.data?.accessToken));
+          dispatch(setAuthCredentials(res.data.data?.user));
+          dispatch(setRole(res.data.data?.user?.userRole?.roles?.roleName))
+          dispatch(setAccessToken(res.data.data?.accessToken));
           dispatch(setIsAuthenticated(true));
         }
         else {
@@ -68,16 +74,17 @@ export const loginUser = (userData: loginData) => {
 export const logout = ()=> {
   return async function logoutThunk(dispatch:Dispatch) {
       try {
+        const authApi = (await import("../api/authApi")).default;
         const res = await authApi.logout();
         if(res.status === 200){
-           dispatch(setAuthCredentials({user: null}));
+           dispatch(setAuthCredentials(null));
            dispatch(setAccessToken(null));
            dispatch(setIsAuthenticated(false));
-           return 1;
+           return res;
         }
         else {
             alert("logout failed");
-            return 0;
+            return res;
         }
       }
       catch(err) {
@@ -88,5 +95,5 @@ export const logout = ()=> {
   }
 }
 
-export const { setAuthCredentials, setAccessToken, clearAuth ,setIsAuthenticated} = authSlice.actions;
+export const { setAuthCredentials, setAccessToken, clearAuth ,setIsAuthenticated, setRole} = authSlice.actions;
 export default authSlice.reducer;

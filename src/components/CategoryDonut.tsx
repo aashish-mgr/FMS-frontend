@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import type { TooltipProps } from 'recharts'
 import { npr } from '../data/dummyData'
-import type { CategoryDatum, DonutTone } from '../types/types'
+import type { CategoryDatum, DonutTone } from '../types/dashboardTypes'
 
 const positivePalette = ['#1E7F4E', '#3E9D6C', '#5FB98A', '#83CFA8', '#A8E0C4', '#C6ECDA', '#33438D', '#7B8AC9']
 const negativePalette = ['#B23A2E', '#C6604C', '#D6836F', '#E3A491', '#EEC3B5', '#F5DAD1', '#B8860B', '#D4AE5C']

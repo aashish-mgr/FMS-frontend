@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ComponentType } from 'react'
 import { ArrowDownRight, ArrowUpRight, TrendingUp } from 'lucide-react'
-import { kpis, kpiPeriods, npr } from '../data/dummyData'
-import type { PeriodKey } from '../types/types'
+import {  kpiPeriods, npr } from '../data/dummyData'
+import type { PeriodKey } from '../types/dashboardTypes'
+import dashboardApi from '../store/api/dashboardApi'
+import type { Kpis } from '../types/dashboardTypes'
 
 type Tone = 'positive' | 'negative' | 'indigo'
 
@@ -35,9 +37,23 @@ function HeroCard({ label, value, tone, Icon }: HeroCardProps) {
 }
 
 export default function KpiSection() {
+  const [kpis, setKpis] = useState<Kpis>()
   const [period, setPeriod] = useState<PeriodKey>('month')
-  const active = kpis[period]
+  const active = kpis?.[period]
   const activeLabel = kpiPeriods.find((p) => p.key === period)!.label
+  
+  
+  const getKpis = async () => {
+    const res = await dashboardApi.getKpis();
+    console.log(res);
+    setKpis(res.data?.data)
+  }
+
+  useEffect(() => {
+    getKpis();
+  
+  }, [])
+  
 
   return (
     <section className="animate-rise">
@@ -62,17 +78,17 @@ export default function KpiSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <HeroCard label={`${activeLabel} Income`} value={active.income} tone="positive" Icon={ArrowDownRight} />
-        <HeroCard label={`${activeLabel} Expense`} value={active.expense} tone="negative" Icon={ArrowUpRight} />
-        <HeroCard label={`${activeLabel} Net Profit`} value={active.profit} tone="indigo" Icon={TrendingUp} />
+        <HeroCard label={`${activeLabel} Income`} value={active?.income as number} tone="positive" Icon={ArrowDownRight} />
+        <HeroCard label={`${activeLabel} Expense`} value={active?.expense as number} tone="negative" Icon={ArrowUpRight} />
+        <HeroCard label={`${activeLabel} Net Profit`} value={active?.profit as number} tone="indigo" Icon={TrendingUp} />
       </div>
 
-      <FullGrid />
+      <FullGrid kpis={kpis}/>
     </section>
   )
 }
 
-function FullGrid() {
+function FullGrid({kpis}: {kpis?: Kpis}){
   return (
     <div className="mt-4 bg-card rounded-xl border border-line shadow-card overflow-hidden">
       <div className="px-5 py-3 border-b border-line flex items-center justify-between">
@@ -80,7 +96,7 @@ function FullGrid() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {kpiPeriods.map((p, idx) => {
-          const v = kpis[p.key]
+          const v = kpis?.[p.key]
           return (
             <div
               key={p.key}
@@ -89,9 +105,9 @@ function FullGrid() {
               }`}
             >
               <p className="text-[11px] font-medium text-muted uppercase tracking-wide mb-2.5">{p.label}</p>
-              <Row label="Income" value={v.income} tone="text-positive" />
-              <Row label="Expense" value={v.expense} tone="text-negative" />
-              <Row label="Profit" value={v.profit} tone={v.profit >= 0 ? 'text-indigo' : 'text-negative'} />
+              <Row label="Income" value={v?.income as number} tone="text-positive" />
+              <Row label="Expense" value={v?.expense as number} tone="text-negative" />
+              <Row label="Profit" value={v?.profit as number} tone={v?.profit as number >= 0 ? 'text-indigo' : 'text-negative'} />
             </div>
           )
         })}

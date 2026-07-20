@@ -17,6 +17,8 @@ interface NavItem {
   active?: boolean
   badge?: number
 }
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 const navItems: NavItem[] = [
   { icon: LayoutGrid, label: 'Dashboard', active: true },
@@ -26,14 +28,23 @@ const navItems: NavItem[] = [
   { icon: BellRing, label: 'Reminders', badge: 7 },
   { icon: StickyNote, label: 'Notes' }
 ]
-const navigate = useNavigate();
-const handleLogout =async () => {
-   logout();
-  navigate("/");
 
-}
 
 export default function Sidebar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+const handleLogout =async () => {
+    await dispatch(logout() as any);
+    console.log(authState)
+}
+const authState = useSelector((state: any) => state.auth);
+useEffect(() => {
+  if(authState.isAuthenticated === false) {
+    navigate("/")
+  }
+ 
+}, [authState])
+
   return (
     <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-ink text-white/90 min-h-screen sticky top-0">
       <div className="flex items-center gap-2.5 px-6 py-6">

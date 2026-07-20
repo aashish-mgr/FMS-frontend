@@ -7,7 +7,7 @@ import type {
   CashFlowByYear,
   Transaction,
   Reminder
-} from '../types/types'
+} from '../types/dashboardTypes'
 
 // Dummy data shaped after the FMS SRS v1.0 data model.
 // In production this is replaced by calls to /api/v1/dashboard/* per Section 6.4.
