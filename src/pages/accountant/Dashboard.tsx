@@ -30,16 +30,14 @@ export default function Dashboard() {
             <CategoryDonut
               title="Income by Category"
               subtitle="Share of revenue across service lines"
-              data={incomeByCategory}
+              dataCategory="income"
               tone="positive"
-              dateRange="Jul 01 – Jul 14"
             />
             <CategoryDonut
               title="Expense by Category"
               subtitle="Where operating costs are going"
-              data={expenseByCategory}
+              dataCategory="expense"
               tone="negative"
-              dateRange="Jul 01 – Jul 14"
             />
           </div>
 

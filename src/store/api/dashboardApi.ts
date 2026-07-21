@@ -10,12 +10,12 @@ class dashboardApi {
         return API.get(`/dashboard/income-expense-chart?period=${period}`)
     }
 
-     async getIncomeByCategory () {
-        return API.get("/dashboard/income-by-category");
+     async getIncomeByCategory (start: string, end: string) {
+        return API.get(`/dashboard/income-by-category/${start}/${end}`);
     }
 
-    async getExpenseByCategory () {
-        return API.get("/dashboard/expense-by-category");
+        async getExpenseByCategory (start: string, end: string) {
+        return API.get(`/dashboard/expense-by-category/${start}/${end}`);
     }
    
     async  getCashFlow (year: number) {

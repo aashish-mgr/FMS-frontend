@@ -30,8 +30,8 @@ export interface BarDatum {
 export type BarChartData = Record<BarRange, BarDatum[]>
 
 export interface CategoryDatum {
-  name: string
-  value: number
+  categoryName: string
+  amount: number
 }
 
 export interface CashFlowDatum {

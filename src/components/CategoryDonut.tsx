@@ -2,7 +2,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { TooltipProps } from "recharts";
 import { npr } from "../data/dummyData";
 import type { CategoryDatum, DonutTone } from "../types/dashboardTypes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import dashboardApi from "../store/api/dashboardApi";
 
 const getDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();
@@ -40,7 +41,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
 function CustomTooltip({ active, payload, total }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const p = payload[0];
-  const value = p.value as number;
+  const value = p.amount as number;
   const pct = ((value / total) * 100).toFixed(1);
   return (
     <div className="bg-ink text-white rounded-lg px-3 py-2 text-xs shadow-panel">
@@ -55,26 +56,43 @@ function CustomTooltip({ active, payload, total }: CustomTooltipProps) {
 interface CategoryDonutProps {
   title: string;
   subtitle: string;
-  data: CategoryDatum[];
+  dataCategory: string;
   tone?: DonutTone;
-  dateRange: string;
 }
 
 export default function CategoryDonut({
   title,
   subtitle,
-  data,
+  dataCategory,
   tone = "positive",
-  dateRange,
 }: CategoryDonutProps) {
+  const [data, setData] = useState<CategoryDatum[]>()
   const palette = tone === "positive" ? positivePalette : negativePalette;
-  const total = data.reduce((s, d) => s + d.value, 0);
-  const top = [...data].sort((a, b) => b.value - a.value).slice(0, 4);
+  const total = data?.reduce((s, d) => s + d.amount, 0) as number;
+  const top = data? [...data].sort((a, b) => b.amount - a.amount).slice(0, 4): [];
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   const [startDate, setStartDate] = useState(getDateInputValue(startOfMonth));
   const [endDate, setEndDate] = useState(getDateInputValue());
 
+  const getData = async () => {
+      let res;
+     if(dataCategory === "income" ) {
+       res = await dashboardApi.getIncomeByCategory(startDate, endDate);
+     }
+     else if (dataCategory === "expense") {
+       res = await dashboardApi.getExpenseByCategory(startDate,endDate);
+     }
+     console.log(res)
+     setData(res?.data?.data);
+    
+  }
+
+  useEffect(() => {
+   getData();
+  }, [,startDate,endDate])
+  
+  
   return (
     <div className="bg-card rounded-xl border border-line shadow-card p-5 animate-rise">
       <div className="flex items-start justify-between mb-1">
@@ -98,7 +116,6 @@ export default function CategoryDonut({
         <span className="text-[11px] font-mono text-muted bg-paper border border-line rounded-md px-2 py-1">
           <input
             type="date"
-            defaultValue={Date.now()}
             value={endDate}
             onChange={(e) => {
               e.preventDefault();
@@ -114,15 +131,15 @@ export default function CategoryDonut({
             <PieChart>
               <Pie
                 data={data}
-                dataKey="value"
-                nameKey="name"
+                dataKey="amount"
+                nameKey="categoryName"
                 innerRadius={44}
                 outerRadius={64}
                 paddingAngle={2}
                 stroke="none"
               >
-                {data.map((entry, i) => (
-                  <Cell key={entry.name} fill={palette[i % palette.length]} />
+                {data?.map((entry, i) => (
+                  <Cell key={entry.categoryName} fill={palette[i % palette.length]} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip total={total} />} />
@@ -141,16 +158,16 @@ export default function CategoryDonut({
         </div>
 
         <ul className="flex-1 space-y-2 min-w-0">
-          {top.map((d) => {
-            const idx = data.findIndex((x) => x.name === d.name);
-            const pct = ((d.value / total) * 100).toFixed(0);
+          {top?.map((d) => {
+            const idx = data?.findIndex((x) => x.categoryName=== d.categoryName);
+             const pct = ((d.amount / total) * 100).toFixed(0)
             return (
-              <li key={d.name} className="flex items-center gap-2 text-xs">
+              <li key={d.categoryName} className="flex items-center gap-2 text-xs">
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: palette[idx % palette.length] }}
+                  style={{ background: palette[idx as number % palette.length] }}
                 />
-                <span className="flex-1 truncate text-ink/80">{d.name}</span>
+                <span className="flex-1 truncate text-ink/80">{d.categoryName}</span>
                 <span className="font-mono tabular text-muted shrink-0">
                   {pct}%
                 </span>
