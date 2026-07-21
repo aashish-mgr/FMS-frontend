@@ -47,11 +47,10 @@ export type EntityType = 'income' | 'expense'
 
 export interface Transaction {
   id: string
-  entity_type: EntityType
+  type: EntityType
   date: string
   category: string
   party: string
-  method: string
   amount: number
 }
 
@@ -62,7 +61,7 @@ export type RepeatRule = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
 export interface Reminder {
   id: string
   title: string
-  reminder_date: string
+  remainderDate: string
   priority: Priority
   status: ReminderStatus
   repeat: RepeatRule
