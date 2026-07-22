@@ -16,12 +16,13 @@ import {
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { npr } from '../../data/dummyData'
-import {  generateIncomeRecords } from '../../data/ledgerDummyData'
+
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { IncomeRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
 import categoryApi from '../../store/api/categoryApi'
 import type { Category } from '../../types/ledgerTypes'
 import incomeApi from '../../store/api/incomeApi'
+import type { incomeType } from '../../types/incomeTypes'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -84,23 +85,14 @@ type FormState = {
   description: string
 }
 
-const EMPTY_FORM: FormState = {
-  transactionDate: TODAY,
-  amount: '',
-  incomeCategoryId: "",
-  incomeSource: '',
-  clientName: '',
-  paymentMethod: 'Bank Transfer',
-  referenceNumber: '',
-  invoiceNumber: '',
-  description: ''
-}
 
 
 
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function IncomePage() {
+
+
   const [records, setRecords] = useState<IncomeRecord[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -108,7 +100,19 @@ export default function IncomePage() {
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
-  const [incomeCategories, setIncomeCategories] = useState<Category[]>()
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>([])
+
+  const EMPTY_FORM: FormState = {
+    transactionDate: TODAY,
+    amount: '',
+    incomeCategoryId: incomeCategories[0]?.id ?? '',
+    incomeSource: '',
+    clientName: '',
+    paymentMethod: 'Bank Transfer',
+    referenceNumber: '',
+    invoiceNumber: '',
+    description: ''
+  }
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -163,7 +167,7 @@ export default function IncomePage() {
 
   const totalPages = Math.max(1, Math.ceil(Number(filtered?.length) / PAGE_SIZE))
   const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const totalIncome = filtered?.reduce((sum, r) => sum + r.amount, 0)
+  const totalIncome = filtered?.reduce((sum, r) => sum + Number(r.amount), 0)
   const avgIncome = Number(filtered?.length) ? Number(totalIncome) / Number(filtered?.length) : 0
 
   function openCreate() {
@@ -173,7 +177,7 @@ export default function IncomePage() {
     setModalOpen(true)
   }
 
-  function openEdit(r: IncomeRecord) {
+  function openEdit(r: incomeType) {
     setEditingId(r.id)
     setForm({
       transactionDate: r.transactionDate,
@@ -206,19 +210,16 @@ export default function IncomePage() {
     return errors
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const errors = validate(form)
     setFormErrors(errors)
-    if (Object.keys(errors).length > 0) return
-
-    const now = new Date().toISOString()
+    if (Object.keys(errors).length > 0) {
+      console.log(errors)
+      return}
 
     if (editingId) {
-      setRecords((prev) =>
-        prev?.map((r) =>
-          r.id === editingId
-            ? {
-                ...r,
+
+      await incomeApi.update({
                 transactionDate: form.transactionDate,
                 amount: Number(form.amount),
                 incomeCategoryId: form.incomeCategoryId,
@@ -227,14 +228,11 @@ export default function IncomePage() {
                 paymentMethod: form.paymentMethod,
                 referenceNumber: form.referenceNumber || undefined,
                 invoiceNumber: form.invoiceNumber || undefined,
-                description: form.description || undefined,
-                updatedAt: now
-              }
-            : r
-        )
-      )
+                description: form.description || undefined
+            }as  incomeType, editingId)
+
     } else {
-      const newRecord: IncomeRecord = {
+      const newRecord: incomeType = {
         id: `inc-${Date.now()}`,
         transactionDate: form.transactionDate,
         amount: Number(form.amount),
@@ -245,21 +243,20 @@ export default function IncomePage() {
         referenceNumber: form.referenceNumber || undefined,
         invoiceNumber: form.invoiceNumber || undefined,
         description: form.description || undefined,
-        attachments: [],
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null
+  
       }
-      setRecords((prev) => [newRecord, ...prev])
-    }
-
+     await incomeApi.create(newRecord);
+  }
+    getIncomeRecords();
     setModalOpen(false)
+    setEditingId(null);
   }
 
-  function handleSoftDelete() {
+  async function handleSoftDelete() {
     if (!pendingDeleteId) return
-    setRecords((prev) => prev?.map((r) => (r.id === pendingDeleteId ? { ...r, deleted_at: new Date().toISOString() } : r)))
+     await incomeApi.delete(pendingDeleteId);
     setPendingDeleteId(null)
+    getIncomeRecords();
   }
 
   function handleExport(format: ExportFormat) {
@@ -470,27 +467,27 @@ export default function IncomePage() {
                     </tr>
                   )}
                   {paged?.map((r) => (
-                    <tr key={r.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
+                    <tr key={r?.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
                       <td className="px-5 py-3 font-mono tabular text-xs text-muted">
-                        {new Date(r.transactionDate).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(r?.transactionDate).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-positive-soft text-positive">
-                          {categoryName(r.incomeCategoryId)}
+                          {categoryName(r?.incomeCategoryId)}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-ink">{r.clientName ?? '—'}</td>
+                      <td className="px-5 py-3 text-ink">{r?.clientName ?? '—'}</td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md border border-line px-2 py-0.5 font-mono text-[11px] text-muted">
                           {r.paymentMethod}
                         </span>
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-muted">{r.invoiceNumber ?? '—'}</td>
-                      <td className="px-5 py-3 text-right font-mono tabular font-medium text-positive">{npr(r.amount)}</td>
+                      <td className="px-5 py-3 font-mono text-xs text-muted">{r?.invoiceNumber ?? '—'}</td>
+                      <td className="px-5 py-3 text-right font-mono tabular font-medium text-positive">{npr(r?.amount)}</td>
                       <td className="px-5 py-3 text-center">
-                        {r.attachments.length ? (
+                        {r.attachments?.length ? (
                           <span className="inline-flex items-center gap-1 text-xs text-muted">
-                            <Paperclip size={12} /> {r.attachments.length}
+                            <Paperclip size={12} /> {r.attachments?.length}
                           </span>
                         ) : (
                           <span className="text-line">—</span>
@@ -666,7 +663,9 @@ export default function IncomePage() {
                 Cancel
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={() => {handleSubmit();
+                  console.log("clicked")
+                }}
                 className="px-4 py-2 rounded-lg bg-ink text-white text-sm font-medium hover:bg-ink/90 transition-colors"
               >
                 {editingId ? 'Save Changes' : 'Add Income'}

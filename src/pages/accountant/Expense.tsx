@@ -21,6 +21,7 @@ import type { Category } from '../../types/ledgerTypes'
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { ExpenseRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
 import categoryApi from '../../store/api/categoryApi'
+import expenseApi from '../../store/api/expenseApi'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -75,22 +76,22 @@ const inputClass =
   'w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition-colors'
 
 type FormState = {
-  expense_date: string
+  transactionDate: string
   amount: string
-  expense_category_id: string
-  vendor_name: string
-  payment_method: PaymentMethod
-  bill_number: string
+  expenseCategoryId: string
+  vendorName: string
+  paymentMethod: PaymentMethod
+  billNumber: string
   description: string
 }
 
 const EMPTY_FORM: FormState = {
-  expense_date: TODAY,
+  transactionDate: TODAY,
   amount: '',
-  expense_category_id: "",
-  vendor_name: '',
-  payment_method: 'Cash',
-  bill_number: '',
+  expenseCategoryId: "",
+  vendorName: '',
+  paymentMethod: 'Cash',
+  billNumber: '',
   description: ''
 }
 
@@ -99,7 +100,7 @@ const EMPTY_FORM: FormState = {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function ExpensePage() {
-  const [records, setRecords] = useState<ExpenseRecord[]>(() => generateExpenseRecords())
+  const [records, setRecords] = useState<ExpenseRecord[]>([])
   const [expenseCategories, setExpenseCategories] = useState<Category[]>();
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -126,38 +127,44 @@ export default function ExpensePage() {
      setExpenseCategories(res.data?.data);
   }
 
+  const getExpenseRecords = async () => {
+    const res = await expenseApi.getAll();
+    setRecords(res.data.data);
+  }
+
   function categoryName(id: string) {
   return expenseCategories?.find((c) => c.id === id)?.categoryName ?? 'Uncategorized'
 }
 
 useEffect(() => {
  getExpenseCategories();
+ getExpenseRecords();
 }, [])
 
 
-  const active = records.filter((r) => !r.deleted_at)
+  const active = records?.filter((r) => !r.deletedAt)
 
   const filtered = useMemo(() => {
-    return active.filter((r) => {
-      if (categoryFilter !== 'all' && r.expense_category_id !== categoryFilter) return false
-      if (paymentFilter !== 'all' && r.payment_method !== paymentFilter) return false
-      if (dateRange.from && r.expense_date < dateRange.from) return false
-      if (dateRange.to && r.expense_date > dateRange.to) return false
+    return active?.filter((r) => {
+      if (categoryFilter !== 'all' && r.expenseCategoryId !== categoryFilter) return false
+      if (paymentFilter !== 'all' && r.paymentMethod !== paymentFilter) return false
+      if (dateRange.from && r.transactionDate < dateRange.from) return false
+      if (dateRange.to && r.transactionDate > dateRange.to) return false
       if (amountRange.min && r.amount < Number(amountRange.min)) return false
       if (amountRange.max && r.amount > Number(amountRange.max)) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
-        const haystack = [r.description, r.vendor_name, r.bill_number].filter(Boolean).join(' ').toLowerCase()
+        const haystack = [r.description, r.vendorName, r.billNumber].filter(Boolean).join(' ').toLowerCase()
         if (!haystack.includes(q)) return false
       }
       return true
     })
   }, [active, categoryFilter, paymentFilter, dateRange, amountRange, search])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const totalExpense = filtered.reduce((sum, r) => sum + r.amount, 0)
-  const avgExpense = filtered.length ? totalExpense / filtered.length : 0
+  const totalPages = Math.max(1, Math.ceil(filtered?.length as number / PAGE_SIZE))
+  const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalExpense = filtered?.reduce((sum, r) => sum + Number(r.amount), 0)
+  const avgExpense = filtered?.length ? Number(totalExpense) / filtered.length : 0
 
   function openCreate() {
     setEditingId(null)
@@ -169,12 +176,12 @@ useEffect(() => {
   function openEdit(r: ExpenseRecord) {
     setEditingId(r.id)
     setForm({
-      expense_date: r.expense_date,
+      transactionDate: r.transactionDate,
       amount: String(r.amount),
-      expense_category_id: r.expense_category_id,
-      vendor_name: r.vendor_name ?? '',
-      payment_method: r.payment_method,
-      bill_number: r.bill_number ?? '',
+      expenseCategoryId: r.expenseCategoryId,
+      vendorName: r.vendorName ?? '',
+      paymentMethod: r.paymentMethod,
+      billNumber: r.billNumber ?? '',
       description: r.description ?? ''
     })
     setFormErrors({})
@@ -186,13 +193,13 @@ useEffect(() => {
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() + 1)
 
-    if (!f.expense_date) errors.expense_date = 'Date is required.'
-    else if (new Date(f.expense_date) > maxDate) errors.expense_date = 'Cannot be more than 1 day in the future.'
+    if (!f.transactionDate) errors.transactionDate = 'Date is required.'
+    else if (new Date(f.transactionDate) > maxDate) errors.transactionDate = 'Cannot be more than 1 day in the future.'
 
     const amountNum = Number(f.amount)
     if (!f.amount || Number.isNaN(amountNum) || amountNum <= 0) errors.amount = 'Amount must be greater than 0.'
-    if (!f.expense_category_id) errors.expense_category_id = 'Category is required.'
-    if (!f.payment_method) errors.payment_method = 'Payment method is required.'
+    if (!f.expenseCategoryId) errors.expenseCategoryId = 'Category is required.'
+    if (!f.paymentMethod) errors.paymentMethod = 'Payment method is required.'
 
     return errors
   }
@@ -206,16 +213,16 @@ useEffect(() => {
 
     if (editingId) {
       setRecords((prev) =>
-        prev.map((r) =>
+        prev?.map((r) =>
           r.id === editingId
             ? {
                 ...r,
-                expense_date: form.expense_date,
+                transactionDate: form.transactionDate,
                 amount: Number(form.amount),
-                expense_category_id: form.expense_category_id,
-                vendor_name: form.vendor_name || undefined,
-                payment_method: form.payment_method,
-                bill_number: form.bill_number || undefined,
+                expenseCategoryId: form.expenseCategoryId,
+                vendorName: form.vendorName || undefined,
+                paymentMethod: form.paymentMethod,
+                billNumber: form.billNumber || undefined,
                 description: form.description || undefined,
                 updated_at: now
               }
@@ -225,17 +232,17 @@ useEffect(() => {
     } else {
       const newRecord: ExpenseRecord = {
         id: `exp-${Date.now()}`,
-        expense_date: form.expense_date,
+        transactionDate: form.transactionDate,
         amount: Number(form.amount),
-        expense_category_id: form.expense_category_id,
-        vendor_name: form.vendor_name || undefined,
-        payment_method: form.payment_method,
-        bill_number: form.bill_number || undefined,
+        expenseCategoryId: form.expenseCategoryId,
+        vendorName: form.vendorName || undefined,
+        paymentMethod: form.paymentMethod,
+        billNumber: form.billNumber || undefined,
         description: form.description || undefined,
         attachments: [],
-        created_at: now,
-        updated_at: now,
-        deleted_at: null
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null
       }
       setRecords((prev) => [newRecord, ...prev])
     }
@@ -266,7 +273,8 @@ useEffect(() => {
 
   const hasActiveFilters =
     search || categoryFilter !== 'all' || paymentFilter !== 'all' || dateRange.from || dateRange.to || amountRange.min || amountRange.max
-
+ console.log(totalExpense)
+ console.log(filtered)
   return (
     <div className="flex min-h-screen bg-paper">
       <Sidebar />
@@ -463,23 +471,23 @@ useEffect(() => {
                   {paged.map((r) => (
                     <tr key={r.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
                       <td className="px-5 py-3 font-mono tabular text-xs text-muted">
-                        {new Date(r.expense_date).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(r.transactionDate).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-negative-soft text-negative">
-                          {categoryName(r.expense_category_id)}
+                          {categoryName(r.expenseCategoryId)}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-ink">{r.vendor_name ?? '—'}</td>
+                      <td className="px-5 py-3 text-ink">{r.vendorName ?? '—'}</td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md border border-line px-2 py-0.5 font-mono text-[11px] text-muted">
-                          {r.payment_method}
+                          {r.paymentMethod}
                         </span>
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-muted">{r.bill_number ?? '—'}</td>
+                      <td className="px-5 py-3 font-mono text-xs text-muted">{r.billNumber ?? '—'}</td>
                       <td className="px-5 py-3 text-right font-mono tabular font-medium text-negative">{npr(r.amount)}</td>
                       <td className="px-5 py-3 text-center">
-                        {r.attachments.length ? (
+                        {r.attachments?.length ? (
                           <span className="inline-flex items-center gap-1 text-xs text-muted">
                             <Paperclip size={12} /> {r.attachments.length}
                           </span>
@@ -555,10 +563,10 @@ useEffect(() => {
                 <input
                   type="date"
                   className={inputClass}
-                  value={form.expense_date}
-                  onChange={(e) => setForm((f) => ({ ...f, expense_date: e.target.value }))}
+                  value={form.transactionDate}
+                  onChange={(e) => setForm((f) => ({ ...f, transactionDate: e.target.value }))}
                 />
-                {formErrors.expense_date && <p className="mt-1 text-xs text-negative">{formErrors.expense_date}</p>}
+                {formErrors.transactionDate && <p className="mt-1 text-xs text-negative">{formErrors.transactionDate}</p>}
               </div>
               <div>
                 <FieldLabel required>Amount (NPR)</FieldLabel>
@@ -577,8 +585,8 @@ useEffect(() => {
                 <FieldLabel required>Category</FieldLabel>
                 <select
                   className={inputClass}
-                  value={form.expense_category_id}
-                  onChange={(e) => setForm((f) => ({ ...f, expense_category_id: e.target.value }))}
+                  value={form.expenseCategoryId}
+                  onChange={(e) => setForm((f) => ({ ...f, expenseCategoryId: e.target.value }))}
                 >
                   {Object.entries(categoryGroups ?? {}).map(([group, cats]) => (
                     <optgroup key={group} label={group}>
@@ -595,8 +603,8 @@ useEffect(() => {
                 <FieldLabel required>Payment Method</FieldLabel>
                 <select
                   className={inputClass}
-                  value={form.payment_method}
-                  onChange={(e) => setForm((f) => ({ ...f, payment_method: e.target.value as PaymentMethod }))}
+                  value={form.paymentMethod}
+                  onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value as PaymentMethod }))}
                 >
                   {paymentMethods.map((m) => (
                     <option key={m} value={m}>
@@ -610,8 +618,8 @@ useEffect(() => {
                 <input
                   className={inputClass}
                   placeholder="e.g., Nepal Telecom"
-                  value={form.vendor_name}
-                  onChange={(e) => setForm((f) => ({ ...f, vendor_name: e.target.value }))}
+                  value={form.vendorName}
+                  onChange={(e) => setForm((f) => ({ ...f, vendorName: e.target.value }))}
                 />
               </div>
               <div>
@@ -619,8 +627,8 @@ useEffect(() => {
                 <input
                   className={inputClass}
                   placeholder="Vendor invoice / bill ref."
-                  value={form.bill_number}
-                  onChange={(e) => setForm((f) => ({ ...f, bill_number: e.target.value }))}
+                  value={form.billNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, billNumber: e.target.value }))}
                 />
               </div>
               <div className="sm:col-span-2">

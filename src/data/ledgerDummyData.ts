@@ -117,22 +117,22 @@ export function generateIncomeRecords(count = 64): IncomeRecord[] {
     const date = dateOffset(daysAgo)
     records.push({
       id: `inc-${1000 + i}`,
-      transaction_date: date,
+      transactionDate: date,
       amount,
-      income_category_id: category.id,
-      income_source: i % 4 === 0 ? 'Direct Bank Transfer' : i % 4 === 1 ? 'Cheque Deposit' : undefined,
-      client_name: pick(clients, i * 5 + 1),
-      payment_method: pick(paymentMethods, i * 11 + 2),
-      reference_number: i % 3 === 0 ? `REF-${20000 + i}` : undefined,
-      invoice_number: i % 2 === 0 ? `INV-${5000 + i}` : undefined,
+      incomeCategoryId: category.id,
+      incomeSource: i % 4 === 0 ? 'Direct Bank Transfer' : i % 4 === 1 ? 'Cheque Deposit' : undefined,
+      clientName: pick(clients, i * 5 + 1),
+      paymentMethod: pick(paymentMethods, i * 11 + 2),
+      referenceNumber: i % 3 === 0 ? `REF-${20000 + i}` : undefined,
+      invoiceNumber: i % 2 === 0 ? `INV-${5000 + i}` : undefined,
       description: i % 6 === 0 ? 'Milestone payment for project delivery.' : undefined,
       attachments: makeAttachments(i),
-      created_at: date,
-      updated_at: date,
-      deleted_at: null
+      createdAt: date,
+      updatedAt: date,
+      deletedAt: null
     })
   }
-  return records.sort((a, b) => (a.transaction_date < b.transaction_date ? 1 : -1))
+  return records.sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
 }
 
 export function generateExpenseRecords(count = 64): ExpenseRecord[] {
@@ -144,18 +144,18 @@ export function generateExpenseRecords(count = 64): ExpenseRecord[] {
     const date = dateOffset(daysAgo)
     records.push({
       id: `exp-${2000 + i}`,
-      expense_date: date,
+      transactionDate: date,
       amount,
-      expense_category_id: category.id,
-      vendor_name: pick(vendors, i * 4 + 2),
-      payment_method: pick(paymentMethods, i * 13 + 1),
-      bill_number: i % 3 === 0 ? `BILL-${9000 + i}` : undefined,
+      expenseCategoryId: category.id,
+      vendorName: pick(vendors, i * 4 + 2),
+      paymentMethod: pick(paymentMethods, i * 13 + 1),
+      billNumber: i % 3 === 0 ? `BILL-${9000 + i}` : undefined,
       description: i % 5 === 0 ? 'Recurring monthly operational cost.' : undefined,
       attachments: makeAttachments(i + 1),
-      created_at: date,
-      updated_at: date,
-      deleted_at: null
+      createdAt: date,
+      updatedAt: date,
+      deletedAt: null
     })
   }
-  return records.sort((a, b) => (a.expense_date < b.expense_date ? 1 : -1))
+  return records.sort((a, b) => (a.transactionDate < b.transactionDate ? 1 : -1))
 }

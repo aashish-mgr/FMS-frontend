@@ -1,12 +1,12 @@
 export interface incomeType {
-    id: string
+    id: string,
     amount: number,
     incomeCategoryId: string,
     paymentMethod: "Other" | "Cash" | "Bank Transfer" | "Cheque" | "Esewa" | "Khalti",
-    incomeSource: string,
-    clientName: string,
+    incomeSource?: string,
+    clientName?: string,
     referenceNumber?: string,
     invoiceNumber?: string,
-    description: string,
-    transactionDate: Date
+    description?: string,
+    transactionDate: string
 }

@@ -2,9 +2,9 @@
 // Companion to dashboardTypes.ts — types for Income Management (SRS §7) and
 // Expense Management (SRS §8). Field names mirror the future API payload.
 
-export type PaymentMethod = 'Cash' | 'Bank Transfer' | 'Cheque' | 'eSewa' | 'Khalti' | 'Other'
+export type PaymentMethod = 'Cash' | 'Bank Transfer' | 'Cheque' | 'Esewa' | 'Khalti' | 'Other'
 
-export const paymentMethods: PaymentMethod[] = ['Cash', 'Bank Transfer', 'Cheque', 'eSewa', 'Khalti', 'Other']
+export const paymentMethods: PaymentMethod[] = ['Cash', 'Bank Transfer', 'Cheque', 'Esewa', 'Khalti', 'Other']
 
 export interface Category {
   id: string
@@ -42,17 +42,17 @@ export interface IncomeRecord {
 // SRS 8.2 — Expense Record Fields
 export interface ExpenseRecord {
   id: string
-  expense_date: string
+  transactionDate: string
   amount: number
-  expense_category_id: string
-  vendor_name?: string
-  payment_method: PaymentMethod
-  bill_number?: string
+  expenseCategoryId: string
+  vendorName?: string
+  paymentMethod: PaymentMethod
+  billNumber?: string
   description?: string
   attachments: Attachment[]
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
 }
 
 export type ExportFormat = 'pdf' | 'excel' | 'csv'
