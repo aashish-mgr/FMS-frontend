@@ -10,30 +10,31 @@ import {
   LogOut
 } from 'lucide-react'
 import { logout } from '../store/slices/authSlice'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 interface NavItem {
   icon: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
   label: string
   active?: boolean
   badge?: number
 }
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const navItems: NavItem[] = [
-  { icon: LayoutGrid, label: 'Dashboard', active: true },
-  { icon: ArrowDownCircle, label: 'Income' },
-  { icon: ArrowUpCircle, label: 'Expense' },
-  { icon: FileBarChart2, label: 'Reports' },
-  { icon: BellRing, label: 'Reminders', badge: 7 },
-  { icon: StickyNote, label: 'Notes' }
+  { icon: LayoutGrid, label: 'Dashboard' ,active: false},
+  { icon: ArrowDownCircle, label: 'Income' , active: false},
+  { icon: ArrowUpCircle, label: 'Expense', active:false},
+  { icon: FileBarChart2, label: 'Reports',active: false },
+  { icon: BellRing, label: 'Reminders', badge: 7 ,active: false},
+  { icon: StickyNote, label: 'Notes' ,active: false}
 ]
 
 
 export default function Sidebar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-const handleLogout =async () => {
+  const loacation = useLocation();
+  const handleLogout =async () => {
     await dispatch(logout() as any);
     console.log(authState)
 }
@@ -44,6 +45,11 @@ useEffect(() => {
   }
  
 }, [authState])
+
+const handleNavigate = async (label: string) => {
+    const newLabel =label.toLowerCase();
+    navigate(`/${newLabel}`);
+}
 
   return (
     <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-ink text-white/90 min-h-screen sticky top-0">
@@ -60,11 +66,13 @@ useEffect(() => {
       <div className="ledger-stitch mx-6 opacity-20" />
 
       <nav className="flex-1 px-3 mt-4 space-y-0.5">
-        {navItems.map(({ icon: Icon, label, active, badge }) => (
+        {navItems.map(({ icon: Icon, label, badge ,active}) => (
           <button
             key={label}
+            onClick={() => {handleNavigate(label)
+            }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-              active
+               location.pathname === `/${label.toLowerCase()}`
                 ? 'bg-white/10 text-white font-medium'
                 : 'text-white/60 hover:bg-white/5 hover:text-white/90'
             }`}
