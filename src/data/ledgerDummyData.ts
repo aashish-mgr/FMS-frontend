@@ -24,7 +24,7 @@ export const incomeCategories: Category[] = [
   { id: 'inc-13', name: 'Hosting Services', description: 'Web hosting service revenue.' },
   { id: 'inc-14', name: 'Domain Services', description: 'Domain registration and renewal revenue.' },
   { id: 'inc-15', name: 'Other', description: 'Income that does not fit other categories.' }
-]
+] 
 
 // SRS 8.3 — Default Expense Categories (Seeded), grouped
 export const expenseCategories: Category[] = [
