@@ -8,8 +8,8 @@ export const paymentMethods: PaymentMethod[] = ['Cash', 'Bank Transfer', 'Cheque
 
 export interface Category {
   id: string
-  name: string
-  description: string
+  categoryName: string
+  categoryDescription: string
   group?: string // expense categories are grouped (SRS 8.3); income categories are not (SRS 7.4)
 }
 
@@ -24,19 +24,19 @@ export interface Attachment {
 // SRS 7.2 — Income Record Fields
 export interface IncomeRecord {
   id: string
-  transaction_date: string
+  transactionDate: string
   amount: number
-  income_category_id: string
-  income_source?: string
-  client_name?: string
-  payment_method: PaymentMethod
-  reference_number?: string
-  invoice_number?: string
+  incomeCategoryId: string
+  incomeSource?: string
+  clientName?: string
+  paymentMethod: PaymentMethod
+  referenceNumber?: string
+  invoiceNumber?: string
   description?: string
   attachments: Attachment[]
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
 }
 
 // SRS 8.2 — Expense Record Fields

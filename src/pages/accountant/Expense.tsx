@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import {
   Plus,
@@ -16,9 +16,11 @@ import {
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { npr } from '../../data/dummyData'
-import { expenseCategories, generateExpenseRecords } from '../../data/ledgerDummyData'
+import {  generateExpenseRecords } from '../../data/ledgerDummyData'
+import type { Category } from '../../types/ledgerTypes'
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { ExpenseRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
+import categoryApi from '../../store/api/categoryApi'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -32,11 +34,7 @@ const toneMap: Record<Tone, { text: string; bg: string; ring: string }> = {
 }
 
 // Expense categories are grouped in the SRS (8.3) — render as <optgroup>.
-const categoryGroups = expenseCategories.reduce<Record<string, typeof expenseCategories>>((acc, c) => {
-  const key = c.group ?? 'Other'
-  ;(acc[key] ??= []).push(c)
-  return acc
-}, {})
+
 
 /* ------------------------------- Summary card ------------------------------- */
 
@@ -89,21 +87,20 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   expense_date: TODAY,
   amount: '',
-  expense_category_id: expenseCategories[0].id,
+  expense_category_id: "",
   vendor_name: '',
   payment_method: 'Cash',
   bill_number: '',
   description: ''
 }
 
-function categoryName(id: string) {
-  return expenseCategories.find((c) => c.id === id)?.name ?? 'Uncategorized'
-}
+
 
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function ExpensePage() {
   const [records, setRecords] = useState<ExpenseRecord[]>(() => generateExpenseRecords())
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -117,6 +114,26 @@ export default function ExpensePage() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
+
+  const categoryGroups = expenseCategories?.reduce<Record<string, typeof expenseCategories>>((acc, c) => {
+  const key = c.group ?? 'Other'
+  ;(acc[key] ??= []).push(c)
+  return acc
+}, {})
+
+  const getExpenseCategories = async () => {
+     const res = await categoryApi.getExpenseCategory();
+     setExpenseCategories(res.data?.data);
+  }
+
+  function categoryName(id: string) {
+  return expenseCategories?.find((c) => c.id === id)?.categoryName ?? 'Uncategorized'
+}
+
+useEffect(() => {
+ getExpenseCategories();
+}, [])
+
 
   const active = records.filter((r) => !r.deleted_at)
 
@@ -326,11 +343,11 @@ export default function ExpensePage() {
                 }}
               >
                 <option value="all">All Categories</option>
-                {Object.entries(categoryGroups).map(([group, cats]) => (
+                {Object.entries(categoryGroups ?? {}).map(([group, cats]) => (
                   <optgroup key={group} label={group}>
                     {cats.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name}
+                        {c.categoryName}
                       </option>
                     ))}
                   </optgroup>
@@ -563,11 +580,11 @@ export default function ExpensePage() {
                   value={form.expense_category_id}
                   onChange={(e) => setForm((f) => ({ ...f, expense_category_id: e.target.value }))}
                 >
-                  {Object.entries(categoryGroups).map(([group, cats]) => (
+                  {Object.entries(categoryGroups ?? {}).map(([group, cats]) => (
                     <optgroup key={group} label={group}>
                       {cats.map((c) => (
                         <option key={c.id} value={c.id}>
-                          {c.name}
+                          {c.categoryName}
                         </option>
                       ))}
                     </optgroup>

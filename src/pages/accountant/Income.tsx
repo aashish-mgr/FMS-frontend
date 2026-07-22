@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import {
   Plus,
@@ -16,9 +16,12 @@ import {
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { npr } from '../../data/dummyData'
-import { incomeCategories, generateIncomeRecords } from '../../data/ledgerDummyData'
+import {  generateIncomeRecords } from '../../data/ledgerDummyData'
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { IncomeRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
+import categoryApi from '../../store/api/categoryApi'
+import type { Category } from '../../types/ledgerTypes'
+import incomeApi from '../../store/api/incomeApi'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -70,43 +73,42 @@ const inputClass =
   'w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition-colors'
 
 type FormState = {
-  transaction_date: string
+  transactionDate: string
   amount: string
-  income_category_id: string
-  income_source: string
-  client_name: string
-  payment_method: PaymentMethod
-  reference_number: string
-  invoice_number: string
+  incomeCategoryId: string
+  incomeSource: string
+  clientName: string
+  paymentMethod: PaymentMethod
+  referenceNumber: string
+  invoiceNumber: string
   description: string
 }
 
 const EMPTY_FORM: FormState = {
-  transaction_date: TODAY,
+  transactionDate: TODAY,
   amount: '',
-  income_category_id: incomeCategories[0].id,
-  income_source: '',
-  client_name: '',
-  payment_method: 'Bank Transfer',
-  reference_number: '',
-  invoice_number: '',
+  incomeCategoryId: "",
+  incomeSource: '',
+  clientName: '',
+  paymentMethod: 'Bank Transfer',
+  referenceNumber: '',
+  invoiceNumber: '',
   description: ''
 }
 
-function categoryName(id: string) {
-  return incomeCategories.find((c) => c.id === id)?.name ?? 'Uncategorized'
-}
+
 
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function IncomePage() {
-  const [records, setRecords] = useState<IncomeRecord[]>(() => generateIncomeRecords())
+  const [records, setRecords] = useState<IncomeRecord[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -114,20 +116,42 @@ export default function IncomePage() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
+  
+  const active = records?.filter((r) => !r.deletedAt);
 
-  const active = records.filter((r) => !r.deleted_at)
+  const getIncomeRecords = async () => {
+    const res = await incomeApi.getAll();
+    console.log(res);
+    setRecords(res.data?.data);
+  }
+
+  const getIncomeCategories = async () => {
+     const res = await categoryApi.getIncomeCategory();
+     console.log(res);
+     setIncomeCategories(res.data?.data);
+  }
+
+  useEffect(() => {
+     getIncomeCategories();
+     getIncomeRecords();
+  }, [])
+
+  function categoryName(id: string) {
+  return incomeCategories?.find((c) => c.id === id)?.categoryName ?? 'Uncategorized'
+}
+  
 
   const filtered = useMemo(() => {
-    return active.filter((r) => {
-      if (categoryFilter !== 'all' && r.income_category_id !== categoryFilter) return false
-      if (paymentFilter !== 'all' && r.payment_method !== paymentFilter) return false
-      if (dateRange.from && r.transaction_date < dateRange.from) return false
-      if (dateRange.to && r.transaction_date > dateRange.to) return false
+    return active?.filter((r) => {
+      if (categoryFilter !== 'all' && r.incomeCategoryId !== categoryFilter) return false
+      if (paymentFilter !== 'all' && r.paymentMethod !== paymentFilter) return false
+      if (dateRange.from && r.transactionDate < dateRange.from) return false
+      if (dateRange.to && r.transactionDate > dateRange.to) return false
       if (amountRange.min && r.amount < Number(amountRange.min)) return false
       if (amountRange.max && r.amount > Number(amountRange.max)) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
-        const haystack = [r.description, r.client_name, r.reference_number, r.invoice_number]
+        const haystack = [r.description, r.clientName, r.referenceNumber, r.invoiceNumber]
           .filter(Boolean)
           .join(' ')
           .toLowerCase()
@@ -137,10 +161,10 @@ export default function IncomePage() {
     })
   }, [active, categoryFilter, paymentFilter, dateRange, amountRange, search])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const totalIncome = filtered.reduce((sum, r) => sum + r.amount, 0)
-  const avgIncome = filtered.length ? totalIncome / filtered.length : 0
+  const totalPages = Math.max(1, Math.ceil(Number(filtered?.length) / PAGE_SIZE))
+  const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalIncome = filtered?.reduce((sum, r) => sum + r.amount, 0)
+  const avgIncome = Number(filtered?.length) ? Number(totalIncome) / Number(filtered?.length) : 0
 
   function openCreate() {
     setEditingId(null)
@@ -152,14 +176,14 @@ export default function IncomePage() {
   function openEdit(r: IncomeRecord) {
     setEditingId(r.id)
     setForm({
-      transaction_date: r.transaction_date,
+      transactionDate: r.transactionDate,
       amount: String(r.amount),
-      income_category_id: r.income_category_id,
-      income_source: r.income_source ?? '',
-      client_name: r.client_name ?? '',
-      payment_method: r.payment_method,
-      reference_number: r.reference_number ?? '',
-      invoice_number: r.invoice_number ?? '',
+      incomeCategoryId: r.incomeCategoryId,
+      incomeSource: r.incomeSource ?? '',
+      clientName: r.clientName ?? '',
+      paymentMethod: r.paymentMethod,
+      referenceNumber: r.referenceNumber ?? '',
+      invoiceNumber: r.invoiceNumber ?? '',
       description: r.description ?? ''
     })
     setFormErrors({})
@@ -171,13 +195,13 @@ export default function IncomePage() {
     const maxDate = new Date()
     maxDate.setDate(maxDate.getDate() + 1)
 
-    if (!f.transaction_date) errors.transaction_date = 'Date is required.'
-    else if (new Date(f.transaction_date) > maxDate) errors.transaction_date = 'Cannot be more than 1 day in the future.'
+    if (!f.transactionDate) errors.transactionDate = 'Date is required.'
+    else if (new Date(f.transactionDate) > maxDate) errors.transactionDate = 'Cannot be more than 1 day in the future.'
 
     const amountNum = Number(f.amount)
     if (!f.amount || Number.isNaN(amountNum) || amountNum <= 0) errors.amount = 'Amount must be greater than 0.'
-    if (!f.income_category_id) errors.income_category_id = 'Category is required.'
-    if (!f.payment_method) errors.payment_method = 'Payment method is required.'
+    if (!f.incomeCategoryId) errors.incomeCategoryId = 'Category is required.'
+    if (!f.paymentMethod) errors.paymentMethod = 'Payment method is required.'
 
     return errors
   }
@@ -191,20 +215,20 @@ export default function IncomePage() {
 
     if (editingId) {
       setRecords((prev) =>
-        prev.map((r) =>
+        prev?.map((r) =>
           r.id === editingId
             ? {
                 ...r,
-                transaction_date: form.transaction_date,
+                transactionDate: form.transactionDate,
                 amount: Number(form.amount),
-                income_category_id: form.income_category_id,
-                income_source: form.income_source || undefined,
-                client_name: form.client_name || undefined,
-                payment_method: form.payment_method,
-                reference_number: form.reference_number || undefined,
-                invoice_number: form.invoice_number || undefined,
+                incomeCategoryId: form.incomeCategoryId,
+                incomeSource: form.incomeSource || undefined,
+                clientName: form.clientName || undefined,
+                paymentMethod: form.paymentMethod,
+                referenceNumber: form.referenceNumber || undefined,
+                invoiceNumber: form.invoiceNumber || undefined,
                 description: form.description || undefined,
-                updated_at: now
+                updatedAt: now
               }
             : r
         )
@@ -212,19 +236,19 @@ export default function IncomePage() {
     } else {
       const newRecord: IncomeRecord = {
         id: `inc-${Date.now()}`,
-        transaction_date: form.transaction_date,
+        transactionDate: form.transactionDate,
         amount: Number(form.amount),
-        income_category_id: form.income_category_id,
-        income_source: form.income_source || undefined,
-        client_name: form.client_name || undefined,
-        payment_method: form.payment_method,
-        reference_number: form.reference_number || undefined,
-        invoice_number: form.invoice_number || undefined,
+        incomeCategoryId: form.incomeCategoryId,
+        incomeSource: form.incomeSource || undefined,
+        clientName: form.clientName || undefined,
+        paymentMethod: form.paymentMethod,
+        referenceNumber: form.referenceNumber || undefined,
+        invoiceNumber: form.invoiceNumber || undefined,
         description: form.description || undefined,
         attachments: [],
-        created_at: now,
-        updated_at: now,
-        deleted_at: null
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null
       }
       setRecords((prev) => [newRecord, ...prev])
     }
@@ -234,13 +258,13 @@ export default function IncomePage() {
 
   function handleSoftDelete() {
     if (!pendingDeleteId) return
-    setRecords((prev) => prev.map((r) => (r.id === pendingDeleteId ? { ...r, deleted_at: new Date().toISOString() } : r)))
+    setRecords((prev) => prev?.map((r) => (r.id === pendingDeleteId ? { ...r, deleted_at: new Date().toISOString() } : r)))
     setPendingDeleteId(null)
   }
 
   function handleExport(format: ExportFormat) {
     // Wire to GET /api/income/export?format=pdf|excel|csv (SRS 7.5) once the API is live.
-    console.log(`Exporting ${filtered.length} income records as ${format}`)
+    console.log(`Exporting ${filtered?.length} income records as ${format}`)
     setExportOpen(false)
   }
 
@@ -303,8 +327,8 @@ export default function IncomePage() {
 
           {/* Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <SummaryCard label="Filtered Total" value={npr(totalIncome)} tone="positive" Icon={ArrowDownRight} />
-            <SummaryCard label="Records Matched" value={String(filtered.length)} tone="indigo" Icon={Receipt} />
+            <SummaryCard label="Filtered Total" value={npr(totalIncome as number)} tone="positive" Icon={ArrowDownRight} />
+            <SummaryCard label="Records Matched" value={String(filtered?.length)} tone="indigo" Icon={Receipt} />
             <SummaryCard label="Average Entry" value={npr(Math.round(avgIncome))} tone="positive" Icon={ArrowDownRight} />
           </div>
 
@@ -332,9 +356,9 @@ export default function IncomePage() {
                 }}
               >
                 <option value="all">All Categories</option>
-                {incomeCategories.map((c) => (
+                {incomeCategories?.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.categoryName}
                   </option>
                 ))}
               </select>
@@ -419,7 +443,7 @@ export default function IncomePage() {
           <div className="bg-card rounded-xl border border-line shadow-card overflow-hidden animate-rise">
             <div className="px-5 py-3 border-b border-line flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                Income Records · {filtered.length} matched
+                Income Records · {filtered?.length} matched
               </p>
             </div>
 
@@ -438,30 +462,30 @@ export default function IncomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paged.length === 0 && (
+                  {paged?.length === 0 && (
                     <tr>
                       <td colSpan={8} className="px-5 py-10 text-center text-sm text-muted">
                         No income records match the current filters.
                       </td>
                     </tr>
                   )}
-                  {paged.map((r) => (
+                  {paged?.map((r) => (
                     <tr key={r.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
                       <td className="px-5 py-3 font-mono tabular text-xs text-muted">
-                        {new Date(r.transaction_date).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(r.transactionDate).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium bg-positive-soft text-positive">
-                          {categoryName(r.income_category_id)}
+                          {categoryName(r.incomeCategoryId)}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-ink">{r.client_name ?? '—'}</td>
+                      <td className="px-5 py-3 text-ink">{r.clientName ?? '—'}</td>
                       <td className="px-5 py-3">
                         <span className="inline-flex items-center rounded-md border border-line px-2 py-0.5 font-mono text-[11px] text-muted">
-                          {r.payment_method}
+                          {r.paymentMethod}
                         </span>
                       </td>
-                      <td className="px-5 py-3 font-mono text-xs text-muted">{r.invoice_number ?? '—'}</td>
+                      <td className="px-5 py-3 font-mono text-xs text-muted">{r.invoiceNumber ?? '—'}</td>
                       <td className="px-5 py-3 text-right font-mono tabular font-medium text-positive">{npr(r.amount)}</td>
                       <td className="px-5 py-3 text-center">
                         {r.attachments.length ? (
@@ -494,8 +518,8 @@ export default function IncomePage() {
 
             <div className="px-5 py-3 border-t border-line flex items-center justify-between">
               <span className="font-mono tabular text-[11px] text-muted">
-                Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of{' '}
-                {filtered.length}
+                Showing {filtered?.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered?.length as number)} of{' '}
+                {filtered?.length}
               </span>
               <div className="flex items-center gap-1">
                 <button
@@ -540,10 +564,10 @@ export default function IncomePage() {
                 <input
                   type="date"
                   className={inputClass}
-                  value={form.transaction_date}
-                  onChange={(e) => setForm((f) => ({ ...f, transaction_date: e.target.value }))}
+                  value={form.transactionDate}
+                  onChange={(e) => setForm((f) => ({ ...f, transactionDate: e.target.value }))}
                 />
-                {formErrors.transaction_date && <p className="mt-1 text-xs text-negative">{formErrors.transaction_date}</p>}
+                {formErrors.transactionDate && <p className="mt-1 text-xs text-negative">{formErrors.transactionDate}</p>}
               </div>
               <div>
                 <FieldLabel required>Amount (NPR)</FieldLabel>
@@ -562,12 +586,12 @@ export default function IncomePage() {
                 <FieldLabel required>Category</FieldLabel>
                 <select
                   className={inputClass}
-                  value={form.income_category_id}
-                  onChange={(e) => setForm((f) => ({ ...f, income_category_id: e.target.value }))}
+                  value={form.incomeCategoryId}
+                  onChange={(e) => setForm((f) => ({ ...f, incomeCategoryId: e.target.value }))}
                 >
-                  {incomeCategories.map((c) => (
+                  {incomeCategories?.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {c.categoryName}
                     </option>
                   ))}
                 </select>
@@ -576,8 +600,8 @@ export default function IncomePage() {
                 <FieldLabel required>Payment Method</FieldLabel>
                 <select
                   className={inputClass}
-                  value={form.payment_method}
-                  onChange={(e) => setForm((f) => ({ ...f, payment_method: e.target.value as PaymentMethod }))}
+                  value={form.paymentMethod}
+                  onChange={(e) => setForm((f) => ({ ...f, paymentMethod: e.target.value as PaymentMethod }))}
                 >
                   {paymentMethods.map((m) => (
                     <option key={m} value={m}>
@@ -591,8 +615,8 @@ export default function IncomePage() {
                 <input
                   className={inputClass}
                   placeholder="e.g., Himalayan Traders Pvt. Ltd."
-                  value={form.client_name}
-                  onChange={(e) => setForm((f) => ({ ...f, client_name: e.target.value }))}
+                  value={form.clientName}
+                  onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
                 />
               </div>
               <div>
@@ -600,8 +624,8 @@ export default function IncomePage() {
                 <input
                   className={inputClass}
                   placeholder="e.g., Direct Bank Transfer"
-                  value={form.income_source}
-                  onChange={(e) => setForm((f) => ({ ...f, income_source: e.target.value }))}
+                  value={form.incomeSource}
+                  onChange={(e) => setForm((f) => ({ ...f, incomeSource: e.target.value }))}
                 />
               </div>
               <div>
@@ -609,8 +633,8 @@ export default function IncomePage() {
                 <input
                   className={inputClass}
                   placeholder="Bank / gateway reference"
-                  value={form.reference_number}
-                  onChange={(e) => setForm((f) => ({ ...f, reference_number: e.target.value }))}
+                  value={form.referenceNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, referenceNumber: e.target.value }))}
                 />
               </div>
               <div>
@@ -618,8 +642,8 @@ export default function IncomePage() {
                 <input
                   className={inputClass}
                   placeholder="Internal invoice ID"
-                  value={form.invoice_number}
-                  onChange={(e) => setForm((f) => ({ ...f, invoice_number: e.target.value }))}
+                  value={form.invoiceNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, invoiceNumber: e.target.value }))}
                 />
               </div>
               <div className="sm:col-span-2">
