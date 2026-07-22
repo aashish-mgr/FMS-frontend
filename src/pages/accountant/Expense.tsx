@@ -22,6 +22,7 @@ import { paymentMethods } from '../../types/ledgerTypes'
 import type { ExpenseRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
 import categoryApi from '../../store/api/categoryApi'
 import expenseApi from '../../store/api/expenseApi'
+import type { expenseType } from '../../types/expenseTypes'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -85,15 +86,7 @@ type FormState = {
   description: string
 }
 
-const EMPTY_FORM: FormState = {
-  transactionDate: TODAY,
-  amount: '',
-  expenseCategoryId: "",
-  vendorName: '',
-  paymentMethod: 'Cash',
-  billNumber: '',
-  description: ''
-}
+
 
 
 
@@ -101,13 +94,23 @@ const EMPTY_FORM: FormState = {
 
 export default function ExpensePage() {
   const [records, setRecords] = useState<ExpenseRecord[]>([])
-  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>([]);
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
+
+  const EMPTY_FORM: FormState = {
+  transactionDate: TODAY,
+  amount: '',
+  expenseCategoryId: expenseCategories[0]?.id ?? "",
+  vendorName: '',
+  paymentMethod: 'Cash',
+  billNumber: '',
+  description: ''
+}
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -204,7 +207,7 @@ useEffect(() => {
     return errors
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const errors = validate(form)
     setFormErrors(errors)
     if (Object.keys(errors).length > 0) return
@@ -212,26 +215,16 @@ useEffect(() => {
     const now = new Date().toISOString()
 
     if (editingId) {
-      setRecords((prev) =>
-        prev?.map((r) =>
-          r.id === editingId
-            ? {
-                ...r,
-                transactionDate: form.transactionDate,
+      await expenseApi.update({ transactionDate: form.transactionDate,
                 amount: Number(form.amount),
                 expenseCategoryId: form.expenseCategoryId,
                 vendorName: form.vendorName || undefined,
                 paymentMethod: form.paymentMethod,
                 billNumber: form.billNumber || undefined,
                 description: form.description || undefined,
-                updated_at: now
-              }
-            : r
-        )
-      )
+              } as expenseType, editingId)
     } else {
-      const newRecord: ExpenseRecord = {
-        id: `exp-${Date.now()}`,
+      const newRecord: expenseType = {
         transactionDate: form.transactionDate,
         amount: Number(form.amount),
         expenseCategoryId: form.expenseCategoryId,
@@ -239,21 +232,18 @@ useEffect(() => {
         paymentMethod: form.paymentMethod,
         billNumber: form.billNumber || undefined,
         description: form.description || undefined,
-        attachments: [],
-        createdAt: now,
-        updatedAt: now,
-        deletedAt: null
       }
-      setRecords((prev) => [newRecord, ...prev])
+      await expenseApi.create(newRecord as expenseType)
     }
-
+    getExpenseRecords();
     setModalOpen(false)
   }
 
-  function handleSoftDelete() {
+  async function handleSoftDelete() {
     if (!pendingDeleteId) return
-    setRecords((prev) => prev.map((r) => (r.id === pendingDeleteId ? { ...r, deleted_at: new Date().toISOString() } : r)))
+    await expenseApi.delete(pendingDeleteId)
     setPendingDeleteId(null)
+    getExpenseRecords();
   }
 
   function handleExport(format: ExportFormat) {

@@ -1,5 +1,5 @@
 export interface expenseType  {
-    transactionDate: Date,
+    transactionDate: string,
     amount: number,
     expenseCategoryId: string,
     paymentMethod: "Other" | "Cash" | "Bank Transfer" | "Cheque" | "Esewa" | "Khalti",
