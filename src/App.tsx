@@ -1,6 +1,7 @@
 import { BrowserRouter,Route,Routes } from 'react-router-dom'
 import Dashboard from './pages/accountant/Dashboard'
 import IncomePage from './pages/accountant/Income'
+import ExpensePage from './pages/accountant/Expense'
 import store from './store'
 import { Provider } from 'react-redux'
 
@@ -20,7 +21,8 @@ function App() {
         <Route path='/' element= {<Login />}/>
         <Route path='/dashboard' element= {<Dashboard />}/>
         <Route path='/income' element= {<IncomePage />} />
-      </Routes>
+        <Route path='/expense' element= {<ExpensePage />} />
+       </Routes>
     </BrowserRouter>
     
      </Provider>
