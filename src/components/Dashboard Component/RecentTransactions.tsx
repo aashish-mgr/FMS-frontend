@@ -1,9 +1,9 @@
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
-import { recentTransactions, npr } from '../data/dummyData'
-import { formatDate } from '../lib/format'
-import dashboardApi from '../store/api/dashboardApi'
+import { recentTransactions, npr } from '../../data/dummyData'
+import { formatDate } from '../../lib/format'
+import dashboardApi from '../../store/api/dashboardApi'
 import { useEffect, useState } from 'react'
-import type { Transaction } from '../types/dashboardTypes'
+import type { Transaction } from '../../types/dashboardTypes'
 
 export default function RecentTransactions() {
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);

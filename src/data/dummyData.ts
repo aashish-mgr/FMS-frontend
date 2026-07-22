@@ -103,28 +103,28 @@ export const barChartData: BarChartData = {
 }
 
 // ---------- 6.2 Income by Category (donut) ----------
-export const incomeByCategory: CategoryDatum[] = [
-  { name: 'Software Development', value: 612400 },
-  { name: 'ERP Development', value: 438200 },
-  { name: 'Corporate Training', value: 356800 },
-  { name: 'Website Development', value: 298500 },
-  { name: 'AMC / Maintenance', value: 214300 },
-  { name: 'Government Project', value: 186900 },
-  { name: 'Mobile App Development', value: 164200 },
-  { name: 'Consultancy', value: 112600 }
-]
+// export const incomeByCategory: CategoryDatum[] = [
+//   { name: 'Software Development', value: 612400 },
+//   { name: 'ERP Development', value: 438200 },
+//   { name: 'Corporate Training', value: 356800 },
+//   { name: 'Website Development', value: 298500 },
+//   { name: 'AMC / Maintenance', value: 214300 },
+//   { name: 'Government Project', value: 186900 },
+//   { name: 'Mobile App Development', value: 164200 },
+//   { name: 'Consultancy', value: 112600 }
+// ]
 
-// ---------- 6.2 Expense by Category (donut) ----------
-export const expenseByCategory: CategoryDatum[] = [
-  { name: 'Salary', value: 782400 },
-  { name: 'Rent', value: 186000 },
-  { name: 'Freelancer Payment', value: 142800 },
-  { name: 'Google Ads', value: 98600 },
-  { name: 'Software Subscription', value: 76300 },
-  { name: 'Internet', value: 24500 },
-  { name: 'Server', value: 68200 },
-  { name: 'Miscellaneous', value: 83500 }
-]
+// // ---------- 6.2 Expense by Category (donut) ----------
+// export const expenseByCategory: CategoryDatum[] = [
+//   { name: 'Salary', value: 782400 },
+//   { name: 'Rent', value: 186000 },
+//   { name: 'Freelancer Payment', value: 142800 },
+//   { name: 'Google Ads', value: 98600 },
+//   { name: 'Software Subscription', value: 76300 },
+//   { name: 'Internet', value: 24500 },
+//   { name: 'Server', value: 68200 },
+//   { name: 'Miscellaneous', value: 83500 }
+// ]
 
 // ---------- 6.2 Monthly Cash Flow (line chart, year selector) ----------
 export const cashFlowByYear: CashFlowByYear = {
@@ -176,13 +176,13 @@ export const recentTransactions: Transaction[] = [
 
 // ---------- 6.3 Upcoming Reminders widget ----------
 export const upcomingReminders: Reminder[] = [
-  { id: 'rem-001', title: 'Disburse Employee Salaries', reminder_date: '2026-07-15', priority: 'HIGH', status: 'PENDING', repeat: 'MONTHLY' },
-  { id: 'rem-002', title: 'Pay Office Rent — Radisson Business Suites', reminder_date: '2026-07-16', priority: 'HIGH', status: 'PENDING', repeat: 'MONTHLY' },
-  { id: 'rem-003', title: 'Renew SSL Certificate — digitalpathshalanepal.com', reminder_date: '2026-07-17', priority: 'MEDIUM', status: 'PENDING', repeat: 'YEARLY' },
-  { id: 'rem-004', title: 'File Government Taxes — Q4 Advance Tax', reminder_date: '2026-07-18', priority: 'HIGH', status: 'PENDING', repeat: 'NONE' },
-  { id: 'rem-005', title: 'Renew Hosting Plan — DigitalOcean', reminder_date: '2026-07-19', priority: 'MEDIUM', status: 'PENDING', repeat: 'YEARLY' },
-  { id: 'rem-006', title: 'Pay Internet Bill — WorldLink', reminder_date: '2026-07-20', priority: 'LOW', status: 'PENDING', repeat: 'MONTHLY' },
-  { id: 'rem-007', title: 'Renew Domain — digitalpathshalanepal.com', reminder_date: '2026-07-21', priority: 'LOW', status: 'PENDING', repeat: 'YEARLY' }
+  { id: 'rem-001', title: 'Disburse Employee Salaries', remainderDate: '2026-07-15', priority: 'HIGH', status: 'PENDING', repeat: 'MONTHLY' },
+  { id: 'rem-002', title: 'Pay Office Rent — Radisson Business Suites', remainderDate: '2026-07-16', priority: 'HIGH', status: 'PENDING', repeat: 'MONTHLY' },
+  { id: 'rem-003', title: 'Renew SSL Certificate — digitalpathshalanepal.com', remainderDate: '2026-07-17', priority: 'MEDIUM', status: 'PENDING', repeat: 'YEARLY' },
+  { id: 'rem-004', title: 'File Government Taxes — Q4 Advance Tax', remainderDate: '2026-07-18', priority: 'HIGH', status: 'PENDING', repeat: 'NONE' },
+  { id: 'rem-005', title: 'Renew Hosting Plan — DigitalOcean', remainderDate: '2026-07-19', priority: 'MEDIUM', status: 'PENDING', repeat: 'YEARLY' },
+  { id: 'rem-006', title: 'Pay Internet Bill — WorldLink', remainderDate: '2026-07-20', priority: 'LOW', status: 'PENDING', repeat: 'MONTHLY' },
+  { id: 'rem-007', title: 'Renew Domain — digitalpathshalanepal.com', remainderDate: '2026-07-21', priority: 'LOW', status: 'PENDING', repeat: 'YEARLY' }
 ]
 
 export const paymentMethods: string[] = ['Cash', 'Bank Transfer', 'Cheque', 'eSewa', 'Khalti', 'Other']

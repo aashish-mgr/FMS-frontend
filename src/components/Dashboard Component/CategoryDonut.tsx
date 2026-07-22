@@ -1,9 +1,9 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { TooltipProps } from "recharts";
-import { npr } from "../data/dummyData";
-import type { CategoryDatum, DonutTone } from "../types/dashboardTypes";
+import { npr } from "../../data/dummyData";
+import type { CategoryDatum, DonutTone } from "../../types/dashboardTypes";
 import { useEffect, useState } from "react";
-import dashboardApi from "../store/api/dashboardApi";
+import dashboardApi from "../../store/api/dashboardApi";
 
 const getDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();

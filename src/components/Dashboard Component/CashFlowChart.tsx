@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import type { TooltipProps } from 'recharts'
-import { cashFlowByYear, npr } from '../data/dummyData'
-import dashboardApi from '../store/api/dashboardApi'
+import { cashFlowByYear, npr } from '../../data/dummyData'
+import dashboardApi from '../../store/api/dashboardApi'
 
 const years = ['2026','2025']
 

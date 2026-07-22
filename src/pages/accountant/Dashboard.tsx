@@ -1,12 +1,12 @@
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
-import KpiSection from "../../components/KpiSection";
-import IncomeExpenseChart from "../../components/IncomeExpenseChart";
-import CategoryDonut from "../../components/CategoryDonut";
-import CashFlowChart from "../../components/CashFlowChart";
-import RecentTransactions from "../../components/RecentTransactions";
-import UpcomingReminders from "../../components/UpcomingReminders";
-import { incomeByCategory, expenseByCategory } from "../../data/dummyData";
+import KpiSection from "../../components/Dashboard Component/KpiSection";
+import IncomeExpenseChart from "../../components/Dashboard Component/IncomeExpenseChart";
+import CategoryDonut from "../../components/Dashboard Component/CategoryDonut";
+import CashFlowChart from "../../components/Dashboard Component/CashFlowChart";
+import RecentTransactions from "../../components/Dashboard Component/RecentTransactions";
+import UpcomingReminders from "../../components/Dashboard Component/UpcomingReminders";
+// import { incomeByCategory, expenseByCategory } from "../../data/dummyData";
 
 export default function Dashboard() {
   return (

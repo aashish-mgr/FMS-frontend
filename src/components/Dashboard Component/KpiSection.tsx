@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { ComponentType } from 'react'
 import { ArrowDownRight, ArrowUpRight, TrendingUp } from 'lucide-react'
-import {  kpiPeriods, npr } from '../data/dummyData'
-import type { PeriodKey } from '../types/dashboardTypes'
-import dashboardApi from '../store/api/dashboardApi'
-import type { Kpis } from '../types/dashboardTypes'
+import {  kpiPeriods, npr } from '../../data/dummyData'
+import type { PeriodKey } from '../../types/dashboardTypes'
+import dashboardApi from '../../store/api/dashboardApi'
+import type { Kpis } from '../../types/dashboardTypes'
 
 type Tone = 'positive' | 'negative' | 'indigo'
 

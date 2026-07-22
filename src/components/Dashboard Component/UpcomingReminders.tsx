@@ -1,10 +1,10 @@
 import { Check, Repeat } from 'lucide-react'
-import { upcomingReminders } from '../data/dummyData'
-import { formatDate, dueLabel } from '../lib/format'
-import type { Priority } from '../types/dashboardTypes'
-import remainderApi from '../store/api/remainderApi'
+import { upcomingReminders } from '../../data/dummyData'
+import { formatDate, dueLabel } from '../../lib/format'
+import type { Priority } from '../../types/dashboardTypes'
+import remainderApi from '../../store/api/remainderApi'
 import { useEffect, useState } from 'react'
-import type { Reminder } from '../types/dashboardTypes'
+import type { Reminder } from '../../types/dashboardTypes'
 
 const priorityStyle: Record<Priority, string> = {
   HIGH: 'bg-negative-soft text-negative',
