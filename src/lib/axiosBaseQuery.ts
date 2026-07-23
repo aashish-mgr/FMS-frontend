@@ -25,7 +25,7 @@ export const axiosBaseQuery =
     const state = api.getState() as RootState;
 
     const token = state.auth.accessToken;
-   console.log(token)
+   
     try {
       const result = await axiosInstance({
         url: args.url,

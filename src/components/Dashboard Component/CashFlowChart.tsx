@@ -39,17 +39,12 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export default function CashFlowChart() {
   const [year, setYear] = useState<string>(years[0])
   // const data = cashFlowByYear[year]
-  const [data, setData] = useState<CashFlowDatum[]>()
-  const {data: cashFlowData, refetch: refetchCashFlow}=  useGetMonthlyCashFlowQuery(Number(year))
+  // const [data, setData] = useState<CashFlowDatum[]>()
+  const {data, refetch: refetchCashFlow, isLoading}=  useGetMonthlyCashFlowQuery(Number(year))
 
-  const getCashFlow = async() => {
-    refetchCashFlow();
-     setData(cashFlowData);
-  }
-  
   useEffect(() => {
-    getCashFlow();
-  }, [year])
+   refetchCashFlow();
+  }, [,year])
   
   return (
     <div className="bg-card rounded-xl border border-line shadow-card p-5 animate-rise">
@@ -71,8 +66,9 @@ export default function CashFlowChart() {
         </select>
       </div>
 
-      <div className="h-72 mt-3">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="h-72 mt-3">{
+        !isLoading ? ( <ResponsiveContainer width="100%" height="100%">
+        
           <LineChart data={data} margin={{ left: -12, right: 8, top: 8 }}>
             <CartesianGrid vertical={false} stroke="#E3E4DD" />
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6B6F76' }} axisLine={{ stroke: '#E3E4DD' }} tickLine={false} />
@@ -88,7 +84,8 @@ export default function CashFlowChart() {
             <Line type="monotone" dataKey="expense" name="Expense" stroke="#B23A2E" strokeWidth={2.5} dot={false} />
             <Line type="monotone" dataKey="profit" name="Net Profit" stroke="#33438D" strokeWidth={2.5} dot={false} strokeDasharray="4 3" />
           </LineChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>) : <p>Loading...</p>}
+       
       </div>
     </div>
   )

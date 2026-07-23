@@ -72,7 +72,7 @@ export const dashboardApi = createApi({
     }),
     getMonthlyCashFlow: builder.query<CashFlowDatum[], number>({
       query: (year) => ({
-        url: `/dashboard/monthly-cash-flow/${year}`,
+        url: `/dashboard/cash-flow/${year}`,
         method: "GET",
       }),
     }),

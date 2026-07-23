@@ -1,9 +1,12 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { TooltipProps } from "recharts";
 import { npr } from "../../data/dummyData";
-import type { CategoryDatum, DonutTone } from "../../types/dashboardTypes";
-import { useEffect, useState } from "react";
-import  {useGetExpenseByCategoryQuery, useGetIncomeByCategoryQuery}from "../../store/api/dashboardApi";
+import type {  DonutTone } from "../../types/dashboardTypes";
+import { useState } from "react";
+import {
+  useGetExpenseByCategoryQuery,
+  useGetIncomeByCategoryQuery,
+} from "../../store/api/dashboardApi";
 
 const getDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();
@@ -66,38 +69,31 @@ export default function CategoryDonut({
   dataCategory,
   tone = "positive",
 }: CategoryDonutProps) {
-  const [data, setData] = useState<CategoryDatum[]>()
-  const palette = tone === "positive" ? positivePalette : negativePalette;
-  const total = data?.reduce((s, d) => s + d.amount, 0) as number;
-  const top = data? [...data].sort((a, b) => b.amount - a.amount).slice(0, 4): [];
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   const [startDate, setStartDate] = useState(getDateInputValue(startOfMonth));
   const [endDate, setEndDate] = useState(getDateInputValue());
+  const {
+    data: incomeData,
+    isLoading: incomeLoading,
+  } = useGetIncomeByCategoryQuery(
+    { start: startDate, end: endDate },
+    { skip: dataCategory != "income" },
+  );
+  const {
+    data: expenseData,
+    isLoading: expenseLoading,
+  } = useGetExpenseByCategoryQuery(
+    { start: startDate, end: endDate },
+    { skip: dataCategory != "expense" },
+  );
+  const data = dataCategory === "income" ? incomeData : expenseData;
+  const palette = tone === "positive" ? positivePalette : negativePalette;
+  const total = data?.reduce((s, d) => s + d.amount, 0) as number;
+  const top = data
+    ? [...data].sort((a, b) => b.amount - a.amount).slice(0, 4)
+    : [];
 
-       const {data: incomeData, refetch: refetchIncomeData} =   useGetIncomeByCategoryQuery({start: startDate,end: endDate})
-     
-    
-       const {data: expenseData, refetch: refetchExpenseData} =  useGetExpenseByCategoryQuery({start: startDate,end: endDate})
-
-
-  const getData = async () => {
-     if(dataCategory === "income") {
-      refetchIncomeData()
-setData(incomeData);
-     }
-     else {
-setData(expenseData);
-refetchExpenseData();
-     }
-     
-  }
-
-  useEffect(() => {
-   getData();
-  }, [,startDate,endDate])
-  
-  
   return (
     <div className="bg-card rounded-xl border border-line shadow-card p-5 animate-rise">
       <div className="flex items-start justify-between mb-1">
@@ -132,7 +128,7 @@ refetchExpenseData();
 
       <div className="flex items-center gap-4 mt-2">
         <div className="w-35 h-35 shrink-0 relative">
-          <ResponsiveContainer width="100%" height="100%">
+          {incomeLoading || expenseLoading ? (<p>Loading....</p>): ( <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data}
@@ -144,12 +140,16 @@ refetchExpenseData();
                 stroke="none"
               >
                 {data?.map((entry, i) => (
-                  <Cell key={entry.categoryName} fill={palette[i % palette.length]} />
+                  <Cell
+                    key={entry.categoryName}
+                    fill={palette[i % palette.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip total={total} />} />
             </PieChart>
-          </ResponsiveContainer>
+          </ResponsiveContainer>)}
+         
           <div className="absolute inset-0 grid place-items-center pointer-events-none">
             <div className="text-center">
               <p className="text-[9px] uppercase tracking-wide text-muted">
@@ -164,15 +164,24 @@ refetchExpenseData();
 
         <ul className="flex-1 space-y-2 min-w-0">
           {top?.map((d) => {
-            const idx = data?.findIndex((x) => x.categoryName=== d.categoryName);
-             const pct = ((d.amount / total) * 100).toFixed(0)
+            const idx = data?.findIndex(
+              (x) => x.categoryName === d.categoryName,
+            );
+            const pct = ((d.amount / total) * 100).toFixed(0);
             return (
-              <li key={d.categoryName} className="flex items-center gap-2 text-xs">
+              <li
+                key={d.categoryName}
+                className="flex items-center gap-2 text-xs"
+              >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: palette[idx as number % palette.length] }}
+                  style={{
+                    background: palette[(idx as number) % palette.length],
+                  }}
                 />
-                <span className="flex-1 truncate text-ink/80">{d.categoryName}</span>
+                <span className="flex-1 truncate text-ink/80">
+                  {d.categoryName}
+                </span>
                 <span className="font-mono tabular text-muted shrink-0">
                   {pct}%
                 </span>
