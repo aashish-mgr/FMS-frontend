@@ -1,26 +1,56 @@
-import { API } from "./index";
+
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
 import type { expenseType } from "../../types/expenseTypes";
 
-class expenseApi {
-    async create(data: expenseType) {
-       return API.post("/expense/",data);
-    }
 
-    async getAll() {
-        return API.get("/expense/");
-    }
+export const expenseApi = createApi({
+    reducerPath: "expenseApi",
+    baseQuery: axiosBaseQuery(),
+    tagTypes: ["Expense"],
+    endpoints: (builder) => ({
+        create: builder.mutation<expenseType,expenseType>({
+            query: (body) =>  ({
+                url: "/expense/",
+                data: body,
+                method: "POST"
+            }),
+            invalidatesTags: ["Expense"]
+        }),   
+        getAll: builder.query<expenseType[],void>({
+            query: () => ({
+                 url: "/expense/",
+                 method: "GET",
 
-    async getSingle(id: string) {
-        return API.get(`/expense/${id}`);
-    }
+            }),
+            providesTags: ["Expense"]
+        }),
 
-    async update(data: expenseType, id: string) {
-        return API.patch(`/expense/${id}`,data);
-    }
+        getSingle: builder.query<expenseType,string> ({
+            query: (id) => ({
+                url: `/expense/${id}`,
+                method: "GET"
+            }),
+            providesTags: ["Expense"]
+        }),
 
-    async  delete(id: string ) {
-        return API.delete(`/expense/${id}`);
-    } 
-}
+        update: builder.mutation<expenseType, {body: expenseType, id: string}> ({
+            query: ({body, id}) => ({
+                url: `/expense/update/${id}`,
+                data: body,
+                method: "PATCH"
+            }),
+            invalidatesTags: ["Expense"]
+        }),
+        delete: builder.mutation<expenseType, string> ({
+              query: (id) => ({
+                url: `/expense/${id}`,
+                method: "DELETE"
+              }),
+              invalidatesTags: ["Expense"]
+        })
+    
+    })
+})
 
-export default new expenseApi();
+export const {useCreateMutation,useGetAllQuery,useGetSingleQuery,useUpdateMutation,useDeleteMutation}= expenseApi;

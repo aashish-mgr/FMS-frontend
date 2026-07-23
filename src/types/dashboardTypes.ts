@@ -22,9 +22,11 @@ export interface KpiPeriod {
 export type BarRange = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 export interface BarDatum {
+  bucket: string
   label: string
   income: number
   expense: number
+  profit: number
 }
 
 export type BarChartData = Record<BarRange, BarDatum[]>
@@ -35,6 +37,7 @@ export interface CategoryDatum {
 }
 
 export interface CashFlowDatum {
+  month: number
   label: string
   income: number
   expense: number
@@ -68,3 +71,15 @@ export interface Reminder {
 }
 
 export type DonutTone = 'positive' | 'negative'
+
+
+
+export interface CategorySlice {
+  categoryId: string;
+  categoryName: string;
+  amount: number;
+  percentage: number;
+}
+
+
+

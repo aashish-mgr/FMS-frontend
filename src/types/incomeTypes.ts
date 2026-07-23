@@ -8,5 +8,10 @@ export interface incomeType {
     referenceNumber?: string,
     invoiceNumber?: string,
     description?: string,
-    transactionDate: string
+    transactionDate: string,
+    createdBy?:  string | undefined
+    updatedBy?: string | undefined,
+    createdAt?: string |undefined,
+    updatedAt?: string | undefined,
+    deletedAt?: string | undefined
 }

@@ -1,4 +1,5 @@
 export interface expenseType  {
+    id?: string
     transactionDate: string,
     amount: number,
     expenseCategoryId: string,
@@ -7,5 +8,9 @@ export interface expenseType  {
     billNumber?: string | undefined,
     description?: string | undefined,
     createdBy?: string | undefined,
-    updatedBy?: string | undefined
+    updatedBy?: string | undefined,
+    createdAt?: string | undefined,
+    updatedAt?: string | undefined,
+    deletedAt?: string | undefined
 }
+
