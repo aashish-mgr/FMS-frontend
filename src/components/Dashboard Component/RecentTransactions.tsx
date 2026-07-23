@@ -6,16 +6,16 @@ import { useEffect, useState } from 'react'
 import type { Transaction } from '../../types/dashboardTypes'
 
 export default function RecentTransactions() {
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>();
+  // const [recentTransactions, setRecentTransactions] = useState<Transaction[]>();
 
-   const {data: transactionData, refetch: refetchTransaction} = useGetRecentTransactionsQuery();
-  const getRecentTransactions = async () => {
-     refetchTransaction();
-     setRecentTransactions(transactionData);
-  }
-  useEffect(() => {
-    getRecentTransactions();
-  }, [])
+   const {data: recentTransactions, refetch: refetchTransaction, isLoading} = useGetRecentTransactionsQuery();
+  // const getRecentTransactions = async () => {
+  //    refetchTransaction();
+  //    setRecentTransactions(transactionData);
+  // }
+  // useEffect(() => {
+  //   getRecentTransactions();
+  // }, [])
   
   return (
     <div className="bg-card rounded-xl border border-line shadow-card animate-rise">
@@ -37,7 +37,7 @@ export default function RecentTransactions() {
               <th className="px-5 py-2.5 font-medium text-right">Amount</th>
             </tr>
           </thead>
-          <tbody>
+          {isLoading ? <p>Loading...</p> : ( <tbody>
             {recentTransactions?.slice(0, 10).map((t) => {
               const isIncome = t.type === 'income'
               return (
@@ -63,7 +63,8 @@ export default function RecentTransactions() {
                 </tr>
               )
             })}
-          </tbody>
+          </tbody>)}
+         
         </table>
       </div>
     </div>

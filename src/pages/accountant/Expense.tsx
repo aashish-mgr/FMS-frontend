@@ -128,8 +128,6 @@ type FormState = {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function ExpensePage() {
-  const [records, setRecords] = useState<expenseType[]>([]);
-  const [expenseCategories, setExpenseCategories] = useState<Category[]>([]);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -143,13 +141,13 @@ export default function ExpensePage() {
    const [updateExpense]= useUpdateMutation();
    const [createExpense] = useCreateMutation();
    const [deleteExpense] = useDeleteMutation();
-  const {data: categoryData, refetch: refetchExpenseCategory} = useGetExpenseCategoryQuery();
-  const { data: expenseData, refetch: refetchExpense } =  useGetAllQuery();
+  const {data: expenseCategories, refetch: refetchExpenseCategory} = useGetExpenseCategoryQuery();
+  const { data: records, refetch: refetchExpense, isLoading: expenseLoading } =  useGetAllQuery();
 
   const EMPTY_FORM: FormState = {
     transactionDate: TODAY,
     amount: "",
-    expenseCategoryId: expenseCategories[0]?.id ?? "",
+    expenseCategoryId: expenseCategories?.[0]?.id ?? "",
     vendorName: "",
     paymentMethod: "Cash",
     billNumber: "",
@@ -165,23 +163,9 @@ export default function ExpensePage() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
 
-  const categoryGroups = expenseCategories?.reduce<
-    Record<string, typeof expenseCategories>
-  >((acc, c) => {
-    const key = c.group ?? "Other";
-    (acc[key] ??= []).push(c);
-    return acc;
-  }, {});
 
-  const getExpenseCategories = async () => {
-    refetchExpenseCategory();
-    setExpenseCategories(categoryData ?? []);
-  };
 
-  const getExpenseRecords = async () => {
-    refetchExpense();
-    setRecords(expenseData ?? []);
-  };
+  
 
   function categoryName(id: string) {
     return (
@@ -189,13 +173,6 @@ export default function ExpensePage() {
       "Uncategorized"
     );
   }
-
-  useEffect(() => {
-    getExpenseCategories();
-    refetchExpenseCategory();
-    getExpenseRecords();
-    refetchExpense();
-  }, []);
 
   const active = records?.filter((r) => !r.deletedAt);
 
@@ -315,7 +292,7 @@ export default function ExpensePage() {
       };
       await createExpense(newRecord);
     }
-    getExpenseRecords();
+    refetchExpense();
     setModalOpen(false);
   }
 
@@ -323,12 +300,12 @@ export default function ExpensePage() {
     if (!pendingDeleteId) return;
     await deleteExpense(pendingDeleteId);
     setPendingDeleteId(null);
-    getExpenseRecords();
+    refetchExpense();
   }
 
   function handleExport(format: ExportFormat) {
     // Wire to GET /api/expense/export?format=pdf|excel|csv (SRS 8.4) once the API is live.
-    console.log(`Exporting ${filtered.length} expense records as ${format}`);
+    console.log(`Exporting ${filtered?.length} expense records as ${format}`);
     setExportOpen(false);
   }
 
@@ -405,13 +382,13 @@ export default function ExpensePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <SummaryCard
               label="Filtered Total"
-              value={npr(totalExpense)}
+              value={npr(Number(totalExpense))}
               tone="negative"
               Icon={ArrowUpRight}
             />
             <SummaryCard
               label="Records Matched"
-              value={String(filtered.length)}
+              value={String(filtered?.length)}
               tone="indigo"
               Icon={Receipt}
             />
@@ -450,15 +427,6 @@ export default function ExpensePage() {
                 }}
               >
                 <option value="all">All Categories</option>
-                {Object.entries(categoryGroups ?? {}).map(([group, cats]) => (
-                  <optgroup key={group} label={group}>
-                    {cats.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.categoryName}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
               </select>
               <select
                 className={inputClass}
@@ -544,7 +512,7 @@ export default function ExpensePage() {
           <div className="bg-card rounded-xl border border-line shadow-card overflow-hidden animate-rise">
             <div className="px-5 py-3 border-b border-line flex items-center justify-between">
               <p className="text-xs font-medium uppercase tracking-wide text-muted">
-                Expense Records · {filtered.length} matched
+                Expense Records · {filtered?.length} matched
               </p>
             </div>
 
@@ -579,7 +547,7 @@ export default function ExpensePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paged.length === 0 && (
+                  {paged?.length === 0 && (
                     <tr>
                       <td
                         colSpan={8}
@@ -589,7 +557,7 @@ export default function ExpensePage() {
                       </td>
                     </tr>
                   )}
-                  {paged.map((r) => (
+                  {paged?.map((r) => (
                     <tr
                       key={r.id}
                       className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors"
@@ -654,9 +622,9 @@ export default function ExpensePage() {
 
             <div className="px-5 py-3 border-t border-line flex items-center justify-between">
               <span className="font-mono tabular text-[11px] text-muted">
-                Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
-                –{Math.min(page * PAGE_SIZE, filtered.length)} of{" "}
-                {filtered.length}
+                Showing {filtered?.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}
+                –{Math.min(page * PAGE_SIZE, Number(filtered?.length))} of{" "}
+                {filtered?.length}
               </span>
               <div className="flex items-center gap-1">
                 <button
@@ -746,15 +714,15 @@ export default function ExpensePage() {
                     }))
                   }
                 >
-                  {Object.entries(categoryGroups ?? {}).map(([group, cats]) => (
-                    <optgroup key={group} label={group}>
-                      {cats.map((c) => (
+                  
+                    <optgroup >
+                      {expenseCategories?.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.categoryName}
                         </option>
                       ))}
                     </optgroup>
-                  ))}
+               
                 </select>
               </div>
               <div>

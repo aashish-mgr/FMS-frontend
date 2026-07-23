@@ -45,18 +45,18 @@ function CustomTooltip({ active, payload, label }:CustomTooltipProps) {
 
 export default function IncomeExpenseChart() {
   const [range, setRange] = useState<BarRange>('monthly')
-  // const data = barChartData[range];
-  const [data, setData] = useState<BarDatum[]>()
-  const {data: chartData, refetch: refetchChart} = useGetIncomeExpenseChartQuery(range)
-  const getBarData =async () => {
+  // // const data = barChartData[range];
+  // const [data, setData] = useState<BarDatum[]>()
+  const {data, refetch: refetchChart, isLoading} = useGetIncomeExpenseChartQuery(range)
+  // const getBarData =async () => {
    
-    refetchChart();
-    setData(chartData)
-  }
+  //   refetchChart();
+  //   setData(chartData)
+  // }
 
-  useEffect(() => {
-     getBarData();
-  }, [,range])
+  // useEffect(() => {
+  //   refetchChart();
+  // }, [range])
   
 
   return (
@@ -82,7 +82,7 @@ export default function IncomeExpenseChart() {
       </div>
 
       <div className="h-72 mt-3">
-        <ResponsiveContainer width="100%" height="100%">
+        {isLoading ? (<p>Loading...</p>) : (<ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} barGap={4} margin={{ left: -12, right: 8, top: 8 }}>
             <CartesianGrid vertical={false} stroke="#E3E4DD" />
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#6B6F76' }} axisLine={{ stroke: '#E3E4DD' }} tickLine={false} />
@@ -97,7 +97,8 @@ export default function IncomeExpenseChart() {
             <Bar dataKey="income" name="Income" fill="#1E7F4E" radius={[4, 4, 0, 0]} maxBarSize={28} />
             <Bar dataKey="expense" name="Expense" fill="#B23A2E" radius={[4, 4, 0, 0]} maxBarSize={28} />
           </BarChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>)}
+        
       </div>
     </div>
   )

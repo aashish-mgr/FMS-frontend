@@ -1,11 +1,9 @@
 import { Check, Repeat } from 'lucide-react'
-import { upcomingReminders } from '../../data/dummyData'
 import { formatDate, dueLabel } from '../../lib/format'
 import type { Priority } from '../../types/dashboardTypes'
-import {useGetRemindersQuery} from '../../store/api/remainderApi'
-import { useEffect, useState } from 'react'
 
-import type { remainderType } from '../../types/remainderTypes'
+
+import { useGetUpcomingRemindersQuery } from '../../store/api/dashboardApi'
 
 const priorityStyle: Record<Priority, string> = {
   HIGH: 'bg-negative-soft text-negative',
@@ -14,17 +12,17 @@ const priorityStyle: Record<Priority, string> = {
 }
 
 export default function UpcomingReminders() {
-  const [upcomingReminders, setUpcomingReminders] = useState<remainderType[] > ([]);
-    const {data: reminderData, refetch: refetchReminder} = useGetRemindersQuery()
+  // const [upcomingReminders, setUpcomingReminders] = useState<remainderType[] > ([]);
+    const {data: upcomingReminders, refetch: refetchReminder, isLoading} = useGetUpcomingRemindersQuery()
+    console.log(upcomingReminders)
+  // const getRemainders = async () => {
+  //   refetchReminder();
+  //   setUpcomingReminders(reminderData?.records ?? []);
 
-  const getRemainders = async () => {
-    refetchReminder();
-    setUpcomingReminders(reminderData?.records ?? []);
-
-  }
-  useEffect(() => {
-   getRemainders();
-  }, [])
+  // }
+  // useEffect(() => {
+  //  getRemainders();
+  // }, [])
   
   return (
     <div className="bg-card rounded-xl border border-line shadow-card animate-rise">
@@ -35,8 +33,7 @@ export default function UpcomingReminders() {
         </div>
         <button className="text-xs font-medium text-indigo hover:text-indigo-deep">View all</button>
       </div>
-
-      <ul className="divide-y divide-line">
+     {isLoading ? (<p>Loading...</p>) : (<ul className="divide-y divide-line">
         {upcomingReminders?.map((r) => (
           <li key={r.id} className="px-5 py-3.5 flex items-start gap-3">
             <button className="mt-0.5 grid place-items-center w-5 h-5 rounded-full border-2 border-line hover:border-positive hover:bg-positive-soft shrink-0 transition-colors">
@@ -60,7 +57,8 @@ export default function UpcomingReminders() {
             <span className="text-[11px] font-mono text-muted shrink-0 pt-0.5">{dueLabel(r.remainderDate?.slice(0,10))}</span>
           </li>
         ))}
-      </ul>
+      </ul>)}
+      
     </div>
   )
 }

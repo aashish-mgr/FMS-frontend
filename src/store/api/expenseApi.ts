@@ -36,7 +36,7 @@ export const expenseApi = createApi({
 
         update: builder.mutation<expenseType, {body: expenseType, id: string}> ({
             query: ({body, id}) => ({
-                url: `/expense/update/${id}`,
+                url: `/expense/${id}`,
                 data: body,
                 method: "PATCH"
             }),

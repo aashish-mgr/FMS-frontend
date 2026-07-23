@@ -91,19 +91,16 @@ type FormState = {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function IncomePage() {
-
-
-  const [records, setRecords] = useState<incomeType[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
-  const [incomeCategories, setIncomeCategories] = useState<Category[]>([])
+  
 
-   const {data: categoryData, refetch: refetchIncomeCategory} = useGetIncomeCategoryQuery();
-    const {data: incomeData, refetch: refetchIncomeData} =  useGetAllQuery();
+   const {data: incomeCategories, refetch: refetchIncomeCategory} = useGetIncomeCategoryQuery();
+    const {data: records, refetch: refetchIncomeData} =  useGetAllQuery();
    
   const [createIncome] = useCreateMutation();
   const [updateIncome] = useUpdateMutation();
@@ -112,7 +109,7 @@ export default function IncomePage() {
   const EMPTY_FORM: FormState = {
     transactionDate: TODAY,
     amount: '',
-    incomeCategoryId: incomeCategories[0]?.id ?? '',
+    incomeCategoryId: incomeCategories?.[0]?.id ?? '',
     incomeSource: '',
     clientName: '',
     paymentMethod: 'Bank Transfer',
@@ -129,23 +126,6 @@ export default function IncomePage() {
   const [exportOpen, setExportOpen] = useState(false)
   
   const active = records?.filter((r) => !r.deletedAt);
-
-  const getIncomeRecords = async () => {
-    refetchIncomeData();
-    setRecords(incomeData ?? []);
-  }
-
-  const getIncomeCategories = async () => {
-    refetchIncomeCategory();
-     setIncomeCategories(categoryData ?? []);
-  }
-
-  useEffect(() => {
-     getIncomeCategories();
-     refetchIncomeCategory();
-     getIncomeRecords();
-     refetchIncomeData();
-  }, [])
 
   function categoryName(id: string) {
   return incomeCategories?.find((c) => c.id === id)?.categoryName ?? 'Uncategorized'
@@ -262,7 +242,7 @@ export default function IncomePage() {
       }
      await createIncome(newRecord);
   }
-    getIncomeRecords();
+    refetchIncomeData();
     setModalOpen(false)
     setEditingId(null);
   }
@@ -271,7 +251,7 @@ export default function IncomePage() {
     if (!pendingDeleteId) return
      await deleteIncome(pendingDeleteId);
     setPendingDeleteId(null)
-    getIncomeRecords();
+    refetchIncomeData();
   }
 
   function handleExport(format: ExportFormat) {

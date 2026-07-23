@@ -37,22 +37,23 @@ function HeroCard({ label, value, tone, Icon }: HeroCardProps) {
 }
 
 export default function KpiSection() {
-  const [kpis, setKpis] = useState<Kpis>()
+  // const [kpis, setKpis] = useState<Kpis>()
+  const {data: kpis, refetch: refetchKpi, isLoading} = useGetKpisQuery();
   const [period, setPeriod] = useState<PeriodKey>('month')
   const active = kpis?.[period]
   const activeLabel = kpiPeriods.find((p) => p.key === period)!.label
   
-  const {data: kpiData, refetch: refetchKpi} = useGetKpisQuery();
   
-  const getKpis = async () => {
-    refetchKpi();
-    setKpis(kpiData);
-  }
+  
+  // const getKpis = async () => {
+  //   refetchKpi();
+  //   setKpis(kpiData);
+  // }
 
-  useEffect(() => {
-    getKpis();
+  // useEffect(() => {
+  //   getKpis();
   
-  }, [])
+  // }, [])
   
 
   return (
@@ -78,12 +79,13 @@ export default function KpiSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <HeroCard label={`${activeLabel} Income`} value={active?.income as number} tone="positive" Icon={ArrowDownRight} />
+        {isLoading ? (<p>Loading..</p>) : ( <><HeroCard label={`${activeLabel} Income`} value={active?.income as number} tone="positive" Icon={ArrowDownRight} />
         <HeroCard label={`${activeLabel} Expense`} value={active?.expense as number} tone="negative" Icon={ArrowUpRight} />
-        <HeroCard label={`${activeLabel} Net Profit`} value={active?.profit as number} tone="indigo" Icon={TrendingUp} />
+        <HeroCard label={`${activeLabel} Net Profit`} value={active?.profit as number} tone="indigo" Icon={TrendingUp} /> </>)}
+       
       </div>
-
-      <FullGrid kpis={kpis}/>
+     {isLoading ? (<p>Loading...</p>) : <FullGrid kpis={kpis}/> }
+      
     </section>
   )
 }

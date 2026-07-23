@@ -36,7 +36,7 @@ export const incomeApi = createApi({
 
         update: builder.mutation<incomeType, {body: incomeType, id: string}> ({
             query: ({body, id}) => ({
-                url: `/income/update/${id}`,
+                url: `/income/${id}`,
                 data: body,
                 method: "PATCH"
             }),
