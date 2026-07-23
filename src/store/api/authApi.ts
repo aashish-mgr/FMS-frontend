@@ -1,23 +1,59 @@
-import { API} from "./index";
+
 
 export interface loginData {
     userEmail: string,
     userPassword: string
 }
 
-class authApi {
-    async login(data: loginData) {
-      return await API.post("/auth/login",data);
-    }
 
-    async logout() {
-        return await API.post("/auth/logout");
-    }
 
-    async refresh() {
-        return await API.post("/auth/refresh")
-    }
+
+
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
+
+interface AuthUser {
+  id: string;
+  fullName: string;
+  email: string;
+  roles: string[];
 }
 
-export default new authApi();
+
+interface LoginResponse {
+  accessToken: string;
+  user: AuthUser;
+}
+
+
+export const authApi = createApi({
+    reducerPath: "authApi",
+    baseQuery: axiosBaseQuery(),
+    endpoints: (builder) => ({
+        login: builder.mutation<LoginResponse,loginData> ({
+            query: (body) => ({
+                url: "/auth/login",
+                method: "POST",
+                data: body
+            }) 
+        }),
+        logout: builder.mutation({
+            query: () => ({
+                url: "/auth/logout",
+                method: "POST"
+            })
+        }),
+        refresh: builder.mutation({
+            query: () => ({
+                url: "/auth/refresh",
+                method: "POST"
+            })
+        })
+
+    })
+}) 
+
+
+export const {useLoginMutation, useLogoutMutation, useRefreshMutation}= authApi;
+
 
