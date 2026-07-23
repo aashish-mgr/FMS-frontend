@@ -1,13 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import type { loginData } from "../api/authApi";
-
-interface AuthUser {
-  id: string;
-  userName: string;
-  userEmail: string;
-  role?: string | null;
-}
+import { useLoginMutation,useLogoutMutation } from "../api/authApi";
+import type { AuthUser } from "../api/authApi";
 
 interface AuthState {
   user: AuthUser | null;
@@ -22,6 +17,10 @@ const initialState: AuthState = {
   isAuthenticated: false
 };
 
+
+
+
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -29,9 +28,9 @@ const authSlice = createSlice({
     setAuthCredentials: (state, action: PayloadAction<AuthUser | null >) => {
       state.user = action.payload;
     },
-    setRole: (state, action: PayloadAction<string | null>) => {
+    setRole: (state, action: PayloadAction<string | undefined>) => {
       if (state.user) {
-        state.user.role = action.payload;
+        state.user.roles = action.payload;
       }
     },
     setAccessToken: (state, action: PayloadAction<string | null>) => {
@@ -48,19 +47,21 @@ const authSlice = createSlice({
 });
 
 export const loginUser = (userData: loginData) => {
+ 
   return async function loginUserThunk(dispatch: Dispatch) {
       try {
-        const authApi = (await import("../api/authApi")).default;
-        const res = await authApi.login(userData)
+         const [login] = useLoginMutation();
+         const res = await login(userData);
         console.log(res);
-        if(res.status === 200){
-          dispatch(setAuthCredentials(res.data.data?.user));
-          dispatch(setRole(res.data.data?.user?.userRole?.roles?.roleName))
-          dispatch(setAccessToken(res.data.data?.accessToken));
-          dispatch(setIsAuthenticated(true));
+        if(res.error){
+          alert("Login Failed.")
+         
         }
         else {
-          alert("Login Failed.")
+           dispatch(setAuthCredentials(res.data?.user));
+          // dispatch(setRole(res.data?.user?.userRole?.roles?.roleName))
+          dispatch(setAccessToken(res.data?.accessToken));
+          dispatch(setIsAuthenticated(true));
         }
       }
       catch(err) {
@@ -72,19 +73,21 @@ export const loginUser = (userData: loginData) => {
 
 
 export const logout = ()=> {
+  
+
   return async function logoutThunk(dispatch:Dispatch) {
       try {
-        const authApi = (await import("../api/authApi")).default;
-        const res = await authApi.logout();
-        if(res.status === 200){
+          const [logoutUser] = useLogoutMutation();
+        const res =await logoutUser();
+        if(res.error){
+           alert("logout failed");
+           
+          
+        }
+        else {
            dispatch(setAuthCredentials(null));
            dispatch(setAccessToken(null));
            dispatch(setIsAuthenticated(false));
-           return res;
-        }
-        else {
-            alert("logout failed");
-            return res;
         }
       }
       catch(err) {

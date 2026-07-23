@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../store/slices/authSlice";
+import { useLoginMutation, type AuthUser } from "../store/api/authApi";
 import { useDispatch, useSelector } from "react-redux";
+import { setAuthCredentials,setIsAuthenticated,setAccessToken } from "../store/slices/authSlice";
 
 const Login = () => {
- const dispatch = useDispatch<any>()
  const authState = useSelector((state: any) => state.auth);
  const navigate = useNavigate();
+ const dispatch = useDispatch();
+
+ const [loginUser] = useLoginMutation();
 
   const [data, setData] = useState({
     userEmail: "",
@@ -30,7 +33,12 @@ const Login = () => {
 
   const handleSubmit = async (e: any) => {
       e.preventDefault();
-        dispatch(loginUser(data));
+     const res =  loginUser(data).unwrap();
+     console.log(res);
+     console.log((await res)?.accessToken)
+      dispatch(setAuthCredentials((await res)?.user as AuthUser));
+      dispatch(setAccessToken((await res)?.accessToken as string)); 
+      dispatch(setIsAuthenticated(true));
   }
 
   return (

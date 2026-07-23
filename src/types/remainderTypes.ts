@@ -1,6 +1,7 @@
 export interface remainderType {
+  id?: string;
  title: string;
- remainderDate: Date;
+ remainderDate: string;
  priority: "LOW" | "MEDIUM" | "HIGH";
  status: "PENDING" | "COMPLETED";
  repeat?: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | undefined;

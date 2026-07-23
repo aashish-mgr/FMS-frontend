@@ -12,11 +12,11 @@ export interface loginData {
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
-  fullName: string;
-  email: string;
-  roles: string[];
+  userName: string;
+  userEmail: string;
+  roles?: string;
 }
 
 
@@ -37,7 +37,7 @@ export const authApi = createApi({
                 data: body
             }) 
         }),
-        logout: builder.mutation({
+        logout: builder.mutation<{message: string},void> ({
             query: () => ({
                 url: "/auth/logout",
                 method: "POST"

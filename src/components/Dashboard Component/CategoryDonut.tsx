@@ -3,7 +3,7 @@ import type { TooltipProps } from "recharts";
 import { npr } from "../../data/dummyData";
 import type { CategoryDatum, DonutTone } from "../../types/dashboardTypes";
 import { useEffect, useState } from "react";
-import dashboardApi from "../../store/api/dashboardApi";
+import  {useGetExpenseByCategoryQuery, useGetIncomeByCategoryQuery}from "../../store/api/dashboardApi";
 
 const getDateInputValue = (date = new Date()) => {
   const year = date.getFullYear();
@@ -75,17 +75,22 @@ export default function CategoryDonut({
   const [startDate, setStartDate] = useState(getDateInputValue(startOfMonth));
   const [endDate, setEndDate] = useState(getDateInputValue());
 
-  const getData = async () => {
-      let res;
-     if(dataCategory === "income" ) {
-       res = await dashboardApi.getIncomeByCategory(startDate, endDate);
-     }
-     else if (dataCategory === "expense") {
-       res = await dashboardApi.getExpenseByCategory(startDate,endDate);
-     }
-     console.log(res)
-     setData(res?.data?.data);
+       const {data: incomeData, refetch: refetchIncomeData} =   useGetIncomeByCategoryQuery({start: startDate,end: endDate})
+     
     
+       const {data: expenseData, refetch: refetchExpenseData} =  useGetExpenseByCategoryQuery({start: startDate,end: endDate})
+
+
+  const getData = async () => {
+     if(dataCategory === "income") {
+      refetchIncomeData()
+setData(incomeData);
+     }
+     else {
+setData(expenseData);
+refetchExpenseData();
+     }
+     
   }
 
   useEffect(() => {

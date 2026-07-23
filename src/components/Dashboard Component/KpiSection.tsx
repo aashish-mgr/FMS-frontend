@@ -3,7 +3,7 @@ import type { ComponentType } from 'react'
 import { ArrowDownRight, ArrowUpRight, TrendingUp } from 'lucide-react'
 import {  kpiPeriods, npr } from '../../data/dummyData'
 import type { PeriodKey } from '../../types/dashboardTypes'
-import dashboardApi from '../../store/api/dashboardApi'
+import {useGetKpisQuery} from '../../store/api/dashboardApi'
 import type { Kpis } from '../../types/dashboardTypes'
 
 type Tone = 'positive' | 'negative' | 'indigo'
@@ -42,11 +42,11 @@ export default function KpiSection() {
   const active = kpis?.[period]
   const activeLabel = kpiPeriods.find((p) => p.key === period)!.label
   
+  const {data: kpiData, refetch: refetchKpi} = useGetKpisQuery();
   
   const getKpis = async () => {
-    const res = await dashboardApi.getKpis();
-    console.log(res);
-    setKpis(res.data?.data)
+    refetchKpi();
+    setKpis(kpiData);
   }
 
   useEffect(() => {

@@ -2,9 +2,10 @@ import { Check, Repeat } from 'lucide-react'
 import { upcomingReminders } from '../../data/dummyData'
 import { formatDate, dueLabel } from '../../lib/format'
 import type { Priority } from '../../types/dashboardTypes'
-import remainderApi from '../../store/api/remainderApi'
+import {useGetRemindersQuery} from '../../store/api/remainderApi'
 import { useEffect, useState } from 'react'
-import type { Reminder } from '../../types/dashboardTypes'
+
+import type { remainderType } from '../../types/remainderTypes'
 
 const priorityStyle: Record<Priority, string> = {
   HIGH: 'bg-negative-soft text-negative',
@@ -13,11 +14,12 @@ const priorityStyle: Record<Priority, string> = {
 }
 
 export default function UpcomingReminders() {
-  const [upcomingReminders, setUpcomingReminders] = useState<Reminder[] > ();
+  const [upcomingReminders, setUpcomingReminders] = useState<remainderType[] > ([]);
+    const {data: reminderData, refetch: refetchReminder} = useGetRemindersQuery()
+
   const getRemainders = async () => {
-    const res = await remainderApi.getAll();
-    console.log(res);
-    setUpcomingReminders(res.data?.data);
+    refetchReminder();
+    setUpcomingReminders(reminderData?.records ?? []);
 
   }
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function UpcomingReminders() {
                   {r.priority}
                 </span>
                 <span className="text-[11px] text-muted font-mono">{formatDate(r.remainderDate?.slice(0,10))}</span>
-                {r.repeat !== 'NONE' && (
+                {r.repeat && r.repeat !== 'NONE' && (
                   <span className="flex items-center gap-1 text-[11px] text-muted">
                     <Repeat size={10} />
                     {r.repeat.toLowerCase()}

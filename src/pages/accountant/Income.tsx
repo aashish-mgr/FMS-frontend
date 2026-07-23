@@ -19,9 +19,9 @@ import { npr } from '../../data/dummyData'
 
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { IncomeRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
-import categoryApi from '../../store/api/categoryApi'
+import {useGetIncomeCategoryQuery} from '../../store/api/categoryApi'
 import type { Category } from '../../types/ledgerTypes'
-import incomeApi from '../../store/api/incomeApi'
+import {useCreateMutation,useDeleteMutation,useGetAllQuery,useUpdateMutation} from '../../store/api/incomeApi'
 import type { incomeType } from '../../types/incomeTypes'
 
 const PAGE_SIZE = 10
@@ -93,7 +93,7 @@ type FormState = {
 export default function IncomePage() {
 
 
-  const [records, setRecords] = useState<IncomeRecord[]>([])
+  const [records, setRecords] = useState<incomeType[]>([])
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -101,6 +101,13 @@ export default function IncomePage() {
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([])
+
+   const {data: categoryData, refetch: refetchIncomeCategory} = useGetIncomeCategoryQuery();
+    const {data: incomeData, refetch: refetchIncomeData} =  useGetAllQuery();
+   
+  const [createIncome] = useCreateMutation();
+  const [updateIncome] = useUpdateMutation();
+  const [deleteIncome] = useDeleteMutation();
 
   const EMPTY_FORM: FormState = {
     transactionDate: TODAY,
@@ -124,20 +131,20 @@ export default function IncomePage() {
   const active = records?.filter((r) => !r.deletedAt);
 
   const getIncomeRecords = async () => {
-    const res = await incomeApi.getAll();
-    console.log(res);
-    setRecords(res.data?.data);
+    refetchIncomeData();
+    setRecords(incomeData ?? []);
   }
 
   const getIncomeCategories = async () => {
-     const res = await categoryApi.getIncomeCategory();
-     console.log(res);
-     setIncomeCategories(res.data?.data);
+    refetchIncomeCategory();
+     setIncomeCategories(categoryData ?? []);
   }
 
   useEffect(() => {
      getIncomeCategories();
+     refetchIncomeCategory();
      getIncomeRecords();
+     refetchIncomeData();
   }, [])
 
   function categoryName(id: string) {
@@ -219,8 +226,18 @@ export default function IncomePage() {
 
     if (editingId) {
 
-      await incomeApi.update({
-                transactionDate: form.transactionDate,
+      // await incomeApi.update({
+      //           transactionDate: form.transactionDate,
+      //           amount: Number(form.amount),
+      //           incomeCategoryId: form.incomeCategoryId,
+      //           incomeSource: form.incomeSource || undefined,
+      //           clientName: form.clientName || undefined,
+      //           paymentMethod: form.paymentMethod,
+      //           referenceNumber: form.referenceNumber || undefined,
+      //           invoiceNumber: form.invoiceNumber || undefined,
+      //           description: form.description || undefined
+      //       }as  incomeType, editingId)
+        await updateIncome({body: {transactionDate: form.transactionDate,
                 amount: Number(form.amount),
                 incomeCategoryId: form.incomeCategoryId,
                 incomeSource: form.incomeSource || undefined,
@@ -228,9 +245,7 @@ export default function IncomePage() {
                 paymentMethod: form.paymentMethod,
                 referenceNumber: form.referenceNumber || undefined,
                 invoiceNumber: form.invoiceNumber || undefined,
-                description: form.description || undefined
-            }as  incomeType, editingId)
-
+                description: form.description || undefined} as incomeType, id: editingId})
     } else {
       const newRecord: incomeType = {
         id: `inc-${Date.now()}`,
@@ -245,7 +260,7 @@ export default function IncomePage() {
         description: form.description || undefined,
   
       }
-     await incomeApi.create(newRecord);
+     await createIncome(newRecord);
   }
     getIncomeRecords();
     setModalOpen(false)
@@ -254,7 +269,7 @@ export default function IncomePage() {
 
   async function handleSoftDelete() {
     if (!pendingDeleteId) return
-     await incomeApi.delete(pendingDeleteId);
+     await deleteIncome(pendingDeleteId);
     setPendingDeleteId(null)
     getIncomeRecords();
   }
@@ -485,13 +500,13 @@ export default function IncomePage() {
                       <td className="px-5 py-3 font-mono text-xs text-muted">{r?.invoiceNumber ?? '—'}</td>
                       <td className="px-5 py-3 text-right font-mono tabular font-medium text-positive">{npr(r?.amount)}</td>
                       <td className="px-5 py-3 text-center">
-                        {r.attachments?.length ? (
+                        {/* {r.attachments?.length ? (
                           <span className="inline-flex items-center gap-1 text-xs text-muted">
                             <Paperclip size={12} /> {r.attachments?.length}
                           </span>
                         ) : (
                           <span className="text-line">—</span>
-                        )}
+                        )} */}
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex justify-end gap-1">

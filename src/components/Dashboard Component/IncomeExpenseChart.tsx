@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { barChartData, npr } from '../../data/dummyData'
-import type { BarRange } from '../../types/dashboardTypes'
-import dashboardApi from '../../store/api/dashboardApi'
+import type { BarDatum,  BarRange } from '../../types/dashboardTypes'
+import {useGetIncomeExpenseChartQuery} from '../../store/api/dashboardApi'
 
 const toggles: { key: BarRange; label: string }[] = [
   { key: 'daily', label: 'Daily' },
@@ -46,12 +46,12 @@ function CustomTooltip({ active, payload, label }:CustomTooltipProps) {
 export default function IncomeExpenseChart() {
   const [range, setRange] = useState<BarRange>('monthly')
   // const data = barChartData[range];
-  const [data, setData] = useState([])
-
+  const [data, setData] = useState<BarDatum[]>()
+  const {data: chartData, refetch: refetchChart} = useGetIncomeExpenseChartQuery(range)
   const getBarData =async () => {
-    const res = await dashboardApi.getIncomeExpenseChart(range);
-    console.log(res);
-    setData(res.data?.data)
+   
+    refetchChart();
+    setData(chartData)
   }
 
   useEffect(() => {

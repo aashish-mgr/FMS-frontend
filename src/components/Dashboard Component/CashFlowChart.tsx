@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import type { TooltipProps } from 'recharts'
 import { cashFlowByYear, npr } from '../../data/dummyData'
-import dashboardApi from '../../store/api/dashboardApi'
+import { useGetMonthlyCashFlowQuery } from '../../store/api/dashboardApi'
+import type{ CashFlowDatum } from '../../types/dashboardTypes'
+
 
 const years = ['2026','2025']
 
@@ -37,18 +39,16 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export default function CashFlowChart() {
   const [year, setYear] = useState<string>(years[0])
   // const data = cashFlowByYear[year]
-  const [data, setData] = useState([])
+  const [data, setData] = useState<CashFlowDatum[]>()
+  const {data: cashFlowData, refetch: refetchCashFlow}=  useGetMonthlyCashFlowQuery(Number(year))
 
   const getCashFlow = async() => {
-     const res = await dashboardApi.getCashFlow(Number(year));
-     console.log(res);
-     console.log(years)
-     setData(res.data?.data);
+    refetchCashFlow();
+     setData(cashFlowData);
   }
   
   useEffect(() => {
     getCashFlow();
-
   }, [year])
   
   return (

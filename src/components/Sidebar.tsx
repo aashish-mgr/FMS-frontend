@@ -9,7 +9,6 @@ import {
   BookOpen,
   LogOut
 } from 'lucide-react'
-import { logout } from '../store/slices/authSlice'
 import { useNavigate,useLocation } from 'react-router-dom';
 interface NavItem {
   icon: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
@@ -17,8 +16,10 @@ interface NavItem {
   active?: boolean
   badge?: number
 }
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useDispatch,useSelector } from 'react-redux';
+import { useLogoutMutation } from '../store/api/authApi';
+import { clearAuth } from '../store/slices/authSlice';
 
 const navItems: NavItem[] = [
   { icon: LayoutGrid, label: 'Dashboard' ,active: false},
@@ -31,11 +32,13 @@ const navItems: NavItem[] = [
 
 
 export default function Sidebar() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const loacation = useLocation();
+  const location = useLocation();
+  const [logout] = useLogoutMutation();
+  const dispatch = useDispatch();
   const handleLogout =async () => {
-    await dispatch(logout() as any);
+    logout();
+    dispatch(clearAuth());
     console.log(authState)
 }
 const authState = useSelector((state: any) => state.auth);

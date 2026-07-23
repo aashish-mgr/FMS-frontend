@@ -49,7 +49,7 @@ export interface ExpenseRecord {
   paymentMethod: PaymentMethod
   billNumber?: string
   description?: string
-  attachments: Attachment[]
+  attachments?: Attachment[]
   createdAt: string
   updatedAt: string
   deletedAt: string | null
