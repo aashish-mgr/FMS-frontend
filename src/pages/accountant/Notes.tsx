@@ -165,6 +165,7 @@ export default function NotesPage() {
 
   function toggleArchive(id: string) {
     const archive = notes?.find((n) => n.id === id)?.isArchived;
+    console.log(!archive);
      updateArchive({id, isArchived: !archive});
   }
 
@@ -246,7 +247,7 @@ export default function NotesPage() {
                       key={n.id}
                       className="relative bg-card rounded-xl border border-line shadow-card overflow-hidden flex flex-col"
                     >
-                      <div className={`h-1.5 ${swatch.bar}`} />
+                      <div className={`h-1.5 ${swatch?.bar}`} />
                       <div className="p-4 flex-1 flex flex-col">
                         <div className="flex items-start justify-between gap-2">
                           <h3 className="font-display text-sm font-semibold text-ink leading-snug">{n.title}</h3>
@@ -263,7 +264,7 @@ export default function NotesPage() {
                         <div className="mt-3 flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
                             {n.colorLabel && (
-                              <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${swatch.chip}`}>
+                              <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${swatch?.chip}`}>
                                 {n.colorLabel}
                               </span>
                             )}

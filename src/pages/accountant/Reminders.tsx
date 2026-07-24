@@ -19,7 +19,8 @@ import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { generateReminders } from '../../data/NoteReminderData'
 import { PRIORITIES, REPEAT_CYCLES } from '../../types/remainderTypes'
-import type { ReminderRecord, Priority, ReminderStatus, RepeatCycle, DateRange } from '../../types/remainderTypes'
+import type { ReminderRecord, Priority, ReminderStatus, RepeatCycle, DateRange, remainderType } from '../../types/remainderTypes'
+import { useCreateReminderMutation, useDeleteReminderMutation, useGetRemindersQuery, useMarkCompleteMutation, useUpdateReminderMutation } from '../../store/api/remainderApi'
 
 const PAGE_SIZE = 10
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -82,8 +83,8 @@ const inputClass =
 type FormState = {
   title: string
   description: string
-  reminder_date: string
-  reminder_time: string
+  remainderDate: string
+  remainderTime: string
   priority: Priority
   repeat: RepeatCycle
 }
@@ -91,8 +92,8 @@ type FormState = {
 const EMPTY_FORM: FormState = {
   title: '',
   description: '',
-  reminder_date: TODAY,
-  reminder_time: '',
+  remainderDate: TODAY,
+  remainderTime: '',
   priority: 'MEDIUM',
   repeat: 'NONE'
 }
@@ -104,7 +105,12 @@ function formatDate(iso: string) {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function RemindersPage() {
-  const [reminders, setReminders] = useState<ReminderRecord[]>(() => generateReminders())
+  const {data: reminders, isLoading} = useGetRemindersQuery();
+  const [createReminder] = useCreateReminderMutation();
+  const [updateReminder] = useUpdateReminderMutation();
+  const [deleteReminder] = useDeleteReminderMutation();
+  const [updateComplete] = useMarkCompleteMutation();
+
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | ReminderStatus>('all')
@@ -117,14 +123,14 @@ export default function RemindersPage() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
-  const active = reminders.filter((r) => !r.deleted_at)
+  const active = reminders?.filter((r) => !r.deletedAt)
 
   const filtered = useMemo(() => {
-    return active.filter((r) => {
+    return active?.filter((r) => {
       if (statusFilter !== 'all' && r.status !== statusFilter) return false
       if (priorityFilter !== 'all' && r.priority !== priorityFilter) return false
-      if (dateRange.from && r.reminder_date < dateRange.from) return false
-      if (dateRange.to && r.reminder_date > dateRange.to) return false
+      if (dateRange.from && r.remainderDate < dateRange.from) return false
+      if (dateRange.to && r.remainderDate > dateRange.to) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
         if (!`${r.title} ${r.description ?? ''}`.toLowerCase().includes(q)) return false
@@ -133,12 +139,12 @@ export default function RemindersPage() {
     })
   }, [active, statusFilter, priorityFilter, dateRange, search])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(Number(filtered?.length) / PAGE_SIZE))
+  const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const dueSoonCount = active.filter((r) => r.status === 'PENDING' && daysUntil(r.reminder_date) >= 0 && daysUntil(r.reminder_date) <= 7).length
-  const overdueCount = active.filter((r) => r.status === 'PENDING' && daysUntil(r.reminder_date) < 0).length
-  const completedCount = active.filter((r) => r.status === 'COMPLETED').length
+  const dueSoonCount = active?.filter((r) => r.status === 'PENDING' && daysUntil(r.remainderDate) >= 0 && daysUntil(r.remainderDate) <= 7).length
+  const overdueCount = active?.filter((r) => r.status === 'PENDING' && daysUntil(r.remainderDate) < 0).length
+  const completedCount = active?.filter((r) => r.status === 'COMPLETED').length
 
   function openCreate() {
     setEditingId(null)
@@ -147,15 +153,15 @@ export default function RemindersPage() {
     setModalOpen(true)
   }
 
-  function openEdit(r: ReminderRecord) {
-    setEditingId(r.id)
+  function openEdit(r: remainderType) {
+    setEditingId(r.id as string)
     setForm({
       title: r.title,
       description: r.description ?? '',
-      reminder_date: r.reminder_date,
-      reminder_time: r.reminder_time ?? '',
+      remainderDate: r.remainderDate,
+      remainderTime: r.remainderTime ?? '',
       priority: r.priority,
-      repeat: r.repeat
+      repeat: r.repeat as RepeatCycle
     })
     setFormErrors({})
     setModalOpen(true)
@@ -164,7 +170,7 @@ export default function RemindersPage() {
   function validate(f: FormState) {
     const errors: Partial<Record<keyof FormState, string>> = {}
     if (!f.title.trim()) errors.title = 'Title is required.'
-    if (!f.reminder_date) errors.reminder_date = 'Reminder date is required.'
+    if (!f.remainderDate) errors.remainderDate = 'Reminder date is required.'
     if (!f.priority) errors.priority = 'Priority is required.'
     return errors
   }
@@ -174,56 +180,38 @@ export default function RemindersPage() {
     setFormErrors(errors)
     if (Object.keys(errors).length > 0) return
 
-    const now = new Date().toISOString()
-
     if (editingId) {
-      setReminders((prev) =>
-        prev.map((r) =>
-          r.id === editingId
-            ? {
-                ...r,
-                title: form.title,
+      updateReminder({body: {title: form.title,
                 description: form.description || undefined,
-                reminder_date: form.reminder_date,
-                reminder_time: form.reminder_time || null,
+                remainderDate: form.remainderDate,
+                remainderTime: form.remainderTime as string || undefined,
                 priority: form.priority,
                 repeat: form.repeat,
-                updated_at: now
-              }
-            : r
-        )
-      )
+                }, id: editingId})
     } else {
-      const newReminder: ReminderRecord = {
+      const newReminder: remainderType = {
         id: `rem-${Date.now()}`,
         title: form.title,
         description: form.description || undefined,
-        reminder_date: form.reminder_date,
-        reminder_time: form.reminder_time || null,
+        remainderDate: form.remainderDate,
+        remainderTime: form.remainderTime || undefined,
         priority: form.priority,
         status: 'PENDING',
         repeat: form.repeat,
-        attachments: [],
-        created_by: 'accountant-01',
-        created_at: now,
-        updated_at: now,
-        deleted_at: null
       }
-      setReminders((prev) => [newReminder, ...prev])
+      createReminder(newReminder);
     }
 
     setModalOpen(false)
   }
 
   function markComplete(id: string) {
-    setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: r.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED', updated_at: new Date().toISOString() } : r))
-    )
+    updateComplete(id);
   }
 
   function handleSoftDelete() {
     if (!pendingDeleteId) return
-    setReminders((prev) => prev.map((r) => (r.id === pendingDeleteId ? { ...r, deleted_at: new Date().toISOString() } : r)))
+    deleteReminder(pendingDeleteId);
     setPendingDeleteId(null)
   }
 
@@ -347,7 +335,7 @@ export default function RemindersPage() {
           {/* Table */}
           <div className="bg-card rounded-xl border border-line shadow-card overflow-hidden animate-rise">
             <div className="px-5 py-3 border-b border-line flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted">Reminders · {filtered.length} matched</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted">Reminders · {filtered?.length} matched</p>
             </div>
 
             <div className="overflow-x-auto">
@@ -365,21 +353,21 @@ export default function RemindersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paged.length === 0 && (
+                  {paged?.length === 0 && (
                     <tr>
                       <td colSpan={8} className="px-5 py-10 text-center text-sm text-muted">
                         No reminders match the current filters.
                       </td>
                     </tr>
                   )}
-                  {paged.map((r) => {
-                    const overdue = r.status === 'PENDING' && daysUntil(r.reminder_date) < 0
+                  {paged?.map((r) => {
+                    const overdue = r.status === 'PENDING' && daysUntil(r.remainderDate) < 0
                     const pTone = toneMap[priorityTone[r.priority]]
                     return (
                       <tr key={r.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
                         <td className="px-5 py-3">
                           <button
-                            onClick={() => markComplete(r.id)}
+                            onClick={() => markComplete(r.id as string)}
                             className={r.status === 'COMPLETED' ? 'text-positive' : 'text-muted hover:text-ink'}
                             title={r.status === 'COMPLETED' ? 'Mark pending' : 'Mark complete'}
                           >
@@ -388,8 +376,8 @@ export default function RemindersPage() {
                         </td>
                         <td className="px-5 py-3">
                           <span className={`font-mono tabular text-xs ${overdue ? 'text-negative font-medium' : 'text-muted'}`}>
-                            {formatDate(r.reminder_date)}
-                            {r.reminder_time ? ` · ${r.reminder_time}` : ''}
+                            {formatDate(r.remainderDate)}
+                            {r.remainderTime ? ` · ${r.remainderTime}` : ''}
                           </span>
                         </td>
                         <td className="px-5 py-3">
@@ -420,13 +408,13 @@ export default function RemindersPage() {
                           )}
                         </td>
                         <td className="px-5 py-3 text-center">
-                          {r.attachments.length ? (
+                          {/* {r.attachments.length ? (
                             <span className="inline-flex items-center gap-1 text-xs text-muted">
                               <Paperclip size={12} /> {r.attachments.length}
                             </span>
                           ) : (
                             <span className="text-line">—</span>
-                          )}
+                          )} */}
                         </td>
                         <td className="px-5 py-3">
                           <div className="flex justify-end gap-1">
@@ -434,7 +422,7 @@ export default function RemindersPage() {
                               <Pencil size={14} />
                             </button>
                             <button
-                              onClick={() => setPendingDeleteId(r.id)}
+                              onClick={() => setPendingDeleteId(r.id as string)}
                               className="p-1.5 rounded-md text-muted hover:text-negative hover:bg-negative-soft"
                               title="Delete"
                             >
@@ -451,8 +439,8 @@ export default function RemindersPage() {
 
             <div className="px-5 py-3 border-t border-line flex items-center justify-between">
               <span className="font-mono tabular text-[11px] text-muted">
-                Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of{' '}
-                {filtered.length}
+                Showing {filtered?.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, Number(filtered?.length))} of{' '}
+                {filtered?.length}
               </span>
               <div className="flex items-center gap-1">
                 <button
@@ -505,18 +493,18 @@ export default function RemindersPage() {
                 <input
                   type="date"
                   className={inputClass}
-                  value={form.reminder_date}
-                  onChange={(e) => setForm((f) => ({ ...f, reminder_date: e.target.value }))}
+                  value={form.remainderDate}
+                  onChange={(e) => setForm((f) => ({ ...f, remainderDate: e.target.value }))}
                 />
-                {formErrors.reminder_date && <p className="mt-1 text-xs text-negative">{formErrors.reminder_date}</p>}
+                {formErrors.remainderDate && <p className="mt-1 text-xs text-negative">{formErrors.remainderDate}</p>}
               </div>
               <div>
                 <FieldLabel>Reminder Time</FieldLabel>
                 <input
                   type="time"
                   className={inputClass}
-                  value={form.reminder_time}
-                  onChange={(e) => setForm((f) => ({ ...f, reminder_time: e.target.value }))}
+                  value={form.remainderTime}
+                  onChange={(e) => setForm((f) => ({ ...f, remainderTime: e.target.value }))}
                 />
               </div>
               <div>
@@ -583,7 +571,7 @@ export default function RemindersPage() {
           <div className="w-full max-w-sm bg-card rounded-xl border border-line shadow-panel p-6">
             <h2 className="font-display text-base font-semibold text-ink">Delete reminder?</h2>
             <p className="mt-2 text-sm text-muted">
-              This soft-deletes the reminder (sets deleted_at). It can still be recovered from the database if needed.
+              This soft-deletes the reminder (sets deletedAt). It can still be recovered from the database if needed.
             </p>
             <div className="mt-5 flex justify-end gap-3">
               <button

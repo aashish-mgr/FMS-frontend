@@ -27,19 +27,23 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
-import type { ListReminderParams,ListReminderResponse,CreateReminderInput,remainderType } from "../../types/remainderTypes";
+import type { ListReminderParams,ListReminderResponse,CreateReminderInput,remainderType, UpdateReminderInput } from "../../types/remainderTypes";
 
 export const reminderApi = createApi({
   reducerPath: "reminderApi",
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Reminder"],
   endpoints: (builder) => ({
-    getReminders: builder.query<ListReminderResponse, ListReminderParams | void>({
+    getReminders: builder.query<remainderType[], ListReminderParams | void>({
       query: (params) => ({ url: "/reminder/", method: "GET", params: params ?? {} }),
       providesTags: ["Reminder"],
     }),
     createReminder: builder.mutation<remainderType, CreateReminderInput>({
       query: (body) => ({ url: "/reminder/", method: "POST", data: body }),
+      invalidatesTags: ["Reminder"],
+    }),
+     updateReminder: builder.mutation<remainderType, {body: UpdateReminderInput, id: string}>({
+      query: ({body,id}) => ({ url: `/reminder/${id}`, method: "PATCH", data: body }),
       invalidatesTags: ["Reminder"],
     }),
     markComplete: builder.mutation<remainderType, string>({
@@ -58,4 +62,5 @@ export const {
   useCreateReminderMutation,
   useMarkCompleteMutation,
   useDeleteReminderMutation,
+  useUpdateReminderMutation
 } = reminderApi;

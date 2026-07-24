@@ -4,19 +4,31 @@ export interface remainderType {
   id?: string;
  title: string;
  remainderDate: string;
- priority: "LOW" | "MEDIUM" | "HIGH";
- status: "PENDING" | "COMPLETED";
- repeat?: "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | undefined;
+ priority: Priority
+ status: ReminderStatus
+ repeat?: RepeatCycle | undefined;
  description?: string | undefined;
  createdBy?: string | undefined;
  remainderTime?: string | undefined;
+ deletedAt?: string | null
 }
 
 export interface CreateReminderInput {
   title: string;
   description?: string;
-  reminderDate: string;
-  priority: "LOW" | "MEDIUM" | "HIGH";
+  remainderDate: string;
+  remainderTime?: string;
+  priority: Priority;
+  repeat?: RepeatCycle
+}
+
+export interface UpdateReminderInput {
+  title?: string;
+  description?: string;
+  remainderDate?: string;
+  remainderTime?: string
+  priority?: Priority;
+  repeat?: RepeatCycle;
 }
 
 export interface ListReminderResponse {
@@ -44,7 +56,7 @@ export interface ReminderRecord {
   title: string
   description?: string
   reminder_date: string
-  reminder_time?: string | null
+  remainderTime?: string | null
   priority: Priority
   status: ReminderStatus
   repeat: RepeatCycle
