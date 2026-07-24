@@ -46,7 +46,6 @@ useEffect(() => {
   if(authState.isAuthenticated === false) {
     navigate("/")
   }
- 
 }, [authState])
 
 const handleNavigate = async (label: string) => {

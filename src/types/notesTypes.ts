@@ -27,3 +27,33 @@ export interface ListNoteParams {
   is_pinned?: boolean;
   is_archived?: boolean;
 }
+
+
+// src/types/notesReminderTypes.ts
+// Types for the Notes Module (SRS §9) and Reminder Module (SRS §10).
+// Field names mirror the future API payloads exactly.
+
+export type ColorLabel = 'green' | 'yellow' | 'red' | null
+
+export interface Attachment {
+  id: string
+  file_name: string
+  file_size: number
+  mime_type: string
+  storage_url: string
+}
+
+// SRS 9.1 — Note Fields
+export interface NoteRecord {
+  id: string
+  title: string
+  description: string
+  color_label: ColorLabel
+  is_pinned: boolean
+  is_archived: boolean
+  created_by: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+

@@ -1,3 +1,5 @@
+import type { Attachment } from "./notesTypes";
+
 export interface remainderType {
   id?: string;
  title: string;
@@ -26,4 +28,34 @@ export interface ListReminderParams {
   page?: number;
   status?: "PENDING" | "COMPLETED";
   priority?: "LOW" | "MEDIUM" | "HIGH";
+}
+
+
+export type Priority = 'LOW' | 'MEDIUM' | 'HIGH'
+export type ReminderStatus = 'PENDING' | 'COMPLETED'
+export type RepeatCycle = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+
+export const PRIORITIES: Priority[] = ['LOW', 'MEDIUM', 'HIGH']
+export const REPEAT_CYCLES: RepeatCycle[] = ['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']
+
+// SRS 10.2 — Reminder Fields
+export interface ReminderRecord {
+  id: string
+  title: string
+  description?: string
+  reminder_date: string
+  reminder_time?: string | null
+  priority: Priority
+  status: ReminderStatus
+  repeat: RepeatCycle
+  attachments: Attachment[]
+  created_by: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface DateRange {
+  from: string
+  to: string
 }
