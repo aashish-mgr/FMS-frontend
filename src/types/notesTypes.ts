@@ -7,12 +7,21 @@ export interface Note {
   colorLabel: string | null;
   isPinned: boolean;
   isArchived: boolean;
-  createdAt: string;
+  createdAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface CreateNoteInput {
   title: string;
   description: string;
+  colorLabel?: string;
+  isPinned?: boolean;
+  isArchived?: boolean;
+}
+
+export interface UpdateNoteInput {
+  title?: string;
+  description?: string;
   colorLabel?: string;
 }
 

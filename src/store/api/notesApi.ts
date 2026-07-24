@@ -27,7 +27,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
-import type { Note,ListNoteParams,ListNoteResponse,CreateNoteInput } from "../../types/notesTypes";
+import type { Note,ListNoteParams,ListNoteResponse,CreateNoteInput, UpdateNoteInput } from "../../types/notesTypes";
 
 
 export const noteApi = createApi({
@@ -35,20 +35,32 @@ export const noteApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Note"],
   endpoints: (builder) => ({
-    getAll: builder.query<ListNoteResponse, ListNoteParams | void>({
-      query: (params) => ({ url: "/notes/", method: "GET", params: params ?? {} }),
+    getAll: builder.query<Note[], ListNoteParams | void>({
+      query: (params) => ({ url: "/note/", method: "GET", params: params ?? {} }),
       providesTags: ["Note"],
     }),
     createNote: builder.mutation<Note, CreateNoteInput>({
-      query: (body) => ({ url: "/notes/", method: "POST", data: body }),
+      query: (body) => ({ url: "/note/", method: "POST", data: body }),
       invalidatesTags: ["Note"],
     }),
+    updateNote: builder.mutation<Note,{body: UpdateNoteInput,id: string}> ({
+       query: ({ body, id }) => ({
+        url: `/note/${id}`,
+        method: "PATCH",
+        data: body,
+       }),
+       invalidatesTags: ["Note"]
+    }),
     togglePin: builder.mutation<Note, { id: string; isPinned: boolean }>({
-      query: ({ id, isPinned }) => ({ url: `/notes/${id}/pin`, method: "PATCH", data: { isPinned } }),
+      query: ({ id, isPinned }) => ({ url: `/note/${id}/pin`, method: "PATCH", data: { isPinned } }),
+      invalidatesTags: ["Note"],
+    }),
+     toggleArchive: builder.mutation<Note, { id: string ,isArchived: boolean }>({
+      query: ({ id, isArchived }) => ({ url: `/note/${id}/archive`, method: "PATCH", data: {isArchived} }),
       invalidatesTags: ["Note"],
     }),
     deleteNote: builder.mutation<void, string>({
-      query: (id) => ({ url: `/notes/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/note/${id}`, method: "DELETE" }),
       invalidatesTags: ["Note"],
     }),
   }),
@@ -59,4 +71,6 @@ export const {
   useCreateNoteMutation,
   useTogglePinMutation,
   useDeleteNoteMutation,
+  useUpdateNoteMutation,
+  useToggleArchiveMutation
 } = noteApi;

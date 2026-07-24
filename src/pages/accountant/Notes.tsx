@@ -4,7 +4,8 @@ import { Plus, Search, Pencil, Trash2, X, Pin, Archive, ArchiveRestore, StickyNo
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { generateNotes } from '../../data/NoteReminderData'
-import type { NoteRecord, ColorLabel } from '../../types/notesTypes'
+import type { NoteRecord, ColorLabel, Note, UpdateNoteInput, CreateNoteInput } from '../../types/notesTypes'
+import { useCreateNoteMutation, useDeleteNoteMutation, useGetAllQuery, useToggleArchiveMutation, useTogglePinMutation, useUpdateNoteMutation } from '../../store/api/notesApi'
 
 type Tone = 'positive' | 'negative' | 'indigo' | 'amber'
 
@@ -15,8 +16,8 @@ const toneMap: Record<Tone, { text: string; bg: string; ring: string }> = {
   amber: { text: 'text-amber', bg: 'bg-amber-soft', ring: 'ring-amber/15' }
 }
 
-// color_label (SRS 9.1) -> visual treatment. null = neutral note.
-const colorSwatch: Record<NonNullable<ColorLabel> | 'none', { bar: string; chip: string }> = {
+// colorLabel (SRS 9.1) -> visual treatment. null = neutral note.
+const colorSwatch: Record<NonNullable<string> | 'none', { bar: string; chip: string }> = {
   green: { bar: 'bg-positive', chip: 'bg-positive-soft text-positive' },
   yellow: { bar: 'bg-amber', chip: 'bg-amber-soft text-amber' },
   red: { bar: 'bg-negative', chip: 'bg-negative-soft text-negative' },
@@ -64,10 +65,10 @@ const inputClass =
 type FormState = {
   title: string
   description: string
-  color_label: ColorLabel
+  colorLabel:  string | null
 }
 
-const EMPTY_FORM: FormState = { title: '', description: '', color_label: null }
+const EMPTY_FORM: FormState = { title: '', description: '', colorLabel: null }
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-NP', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -75,8 +76,14 @@ function formatDate(iso: string) {
 
 /* ----------------------------------- Page ------------------------------------ */
 
-export default function NotesPage() {
-  const [notes, setNotes] = useState<NoteRecord[]>(() => generateNotes())
+export default function NotesPage() { 
+  const {data: notes, isLoading } = useGetAllQuery()
+   const [updateNote] = useUpdateNoteMutation();
+   const [createNote] = useCreateNoteMutation();
+   const [updatePin] = useTogglePinMutation();
+   const [updateArchive] = useToggleArchiveMutation();
+   const [deleteNote] = useDeleteNoteMutation();
+
   const [search, setSearch] = useState('')
   const [pinnedFilter, setPinnedFilter] = useState<'all' | 'pinned' | 'unpinned'>('all')
   const [archivedFilter, setArchivedFilter] = useState<'active' | 'archived' | 'all'>('active')
@@ -87,14 +94,14 @@ export default function NotesPage() {
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof FormState, string>>>({})
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
-  const notDeleted = notes.filter((n) => !n.deleted_at)
+  const notDeleted = notes?.filter((n) => !n.deletedAt)
 
   const filtered = useMemo(() => {
-    return notDeleted.filter((n) => {
-      if (archivedFilter === 'active' && n.is_archived) return false
-      if (archivedFilter === 'archived' && !n.is_archived) return false
-      if (pinnedFilter === 'pinned' && !n.is_pinned) return false
-      if (pinnedFilter === 'unpinned' && n.is_pinned) return false
+    return notDeleted?.filter((n) => {
+      if (archivedFilter === 'active' && n.isArchived) return false
+      if (archivedFilter === 'archived' && !n.isArchived) return false
+      if (pinnedFilter === 'pinned' && !n.isPinned) return false
+      if (pinnedFilter === 'unpinned' && n.isPinned) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
         if (!`${n.title} ${n.description}`.toLowerCase().includes(q)) return false
@@ -103,9 +110,9 @@ export default function NotesPage() {
     })
   }, [notDeleted, archivedFilter, pinnedFilter, search])
 
-  const pinnedCount = notDeleted.filter((n) => n.is_pinned && !n.is_archived).length
-  const archivedCount = notDeleted.filter((n) => n.is_archived).length
-  const activeCount = notDeleted.filter((n) => !n.is_archived).length
+  const pinnedCount = notDeleted?.filter((n) => n.isPinned && !n.isArchived).length
+  const archivedCount = notDeleted?.filter((n) => n.isArchived).length
+  const activeCount = notDeleted?.filter((n) => !n.isArchived).length
 
   function openCreate() {
     setEditingId(null)
@@ -114,9 +121,9 @@ export default function NotesPage() {
     setModalOpen(true)
   }
 
-  function openEdit(n: NoteRecord) {
+  function openEdit(n: Note) {
     setEditingId(n.id)
-    setForm({ title: n.title, description: n.description, color_label: n.color_label })
+    setForm({ title: n.title, description: n.description, colorLabel: n.colorLabel  })
     setFormErrors({})
     setModalOpen(true)
   }
@@ -136,44 +143,34 @@ export default function NotesPage() {
     const now = new Date().toISOString()
 
     if (editingId) {
-      setNotes((prev) =>
-        prev.map((n) =>
-          n.id === editingId
-            ? { ...n, title: form.title, description: form.description, color_label: form.color_label, updated_at: now }
-            : n
-        )
-      )
+      updateNote({body: { title: form.title, description: form.description, colorLabel: form.colorLabel} as UpdateNoteInput ,id: editingId})
     } else {
-      const newNote: NoteRecord = {
-        id: `note-${Date.now()}`,
+      const newNote: CreateNoteInput = {
         title: form.title,
         description: form.description,
-        color_label: form.color_label,
-        is_pinned: false,
-        is_archived: false,
-        created_by: 'accountant-01',
-        created_at: now,
-        updated_at: now,
-        deleted_at: null
+        colorLabel: form.colorLabel as string,
+        isPinned: false,
+        isArchived: false,
       }
-      setNotes((prev) => [newNote, ...prev])
+      createNote(newNote as CreateNoteInput);
     }
 
     setModalOpen(false)
   }
 
   function togglePin(id: string) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, is_pinned: !n.is_pinned, updated_at: new Date().toISOString() } : n)))
+     const pin = notes?.find((n) => n.id === id)?.isPinned;
+     updatePin({id, isPinned: !pin})
   }
 
   function toggleArchive(id: string) {
-    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, is_archived: !n.is_archived, updated_at: new Date().toISOString() } : n)))
+    const archive = notes?.find((n) => n.id === id)?.isArchived;
+     updateArchive({id, isArchived: !archive});
   }
 
   function handleSoftDelete() {
     if (!pendingDeleteId) return
-    setNotes((prev) => prev.map((n) => (n.id === pendingDeleteId ? { ...n, deleted_at: new Date().toISOString() } : n)))
-    setPendingDeleteId(null)
+    deleteNote(pendingDeleteId);
   }
 
   return (
@@ -236,14 +233,14 @@ export default function NotesPage() {
 
           {/* Notes grid */}
           <div className="animate-rise">
-            {filtered.length === 0 ? (
+            {filtered?.length === 0 ? (
               <div className="bg-card rounded-xl border border-line shadow-card p-10 text-center text-sm text-muted">
                 No notes match the current filters.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filtered.map((n) => {
-                  const swatch = colorSwatch[n.color_label ?? 'none']
+                {filtered?.map((n) => {
+                  const swatch = colorSwatch[n.colorLabel ?? 'none']
                   return (
                     <div
                       key={n.id}
@@ -255,28 +252,28 @@ export default function NotesPage() {
                           <h3 className="font-display text-sm font-semibold text-ink leading-snug">{n.title}</h3>
                           <button
                             onClick={() => togglePin(n.id)}
-                            className={`shrink-0 p-1 rounded-md hover:bg-paper ${n.is_pinned ? 'text-amber' : 'text-muted'}`}
-                            title={n.is_pinned ? 'Unpin' : 'Pin'}
+                            className={`shrink-0 p-1 rounded-md hover:bg-paper ${n.isPinned ? 'text-amber' : 'text-muted'}`}
+                            title={n.isPinned ? 'Unpin' : 'Pin'}
                           >
-                            {n.is_pinned ? <Pin size={14} fill="currentColor" /> : <Pin size={14} />}
+                            {n.isPinned ? <Pin size={14} fill="currentColor" /> : <Pin size={14} />}
                           </button>
                         </div>
                         <p className="text-xs text-muted mt-1.5 line-clamp-3 flex-1">{n.description}</p>
 
                         <div className="mt-3 flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            {n.color_label && (
+                            {n.colorLabel && (
                               <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${swatch.chip}`}>
-                                {n.color_label}
+                                {n.colorLabel}
                               </span>
                             )}
-                            {n.is_archived && (
+                            {n.isArchived && (
                               <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium bg-paper text-muted border border-line">
                                 Archived
                               </span>
                             )}
                           </div>
-                          <span className="font-mono text-[10px] text-muted">{formatDate(n.created_at)}</span>
+                          <span className="font-mono text-[10px] text-muted">{formatDate(n.createdAt as string)}</span>
                         </div>
                       </div>
 
@@ -284,9 +281,9 @@ export default function NotesPage() {
                         <button
                           onClick={() => toggleArchive(n.id)}
                           className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper"
-                          title={n.is_archived ? 'Restore' : 'Archive'}
+                          title={n.isArchived ? 'Restore' : 'Archive'}
                         >
-                          {n.is_archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+                          {n.isArchived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
                         </button>
                         <button onClick={() => openEdit(n)} className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper" title="Edit">
                           <Pencil size={14} />
@@ -346,12 +343,12 @@ export default function NotesPage() {
                 <div className="flex items-center gap-2">
                   {(['none', 'green', 'yellow', 'red'] as const).map((c) => {
                     const val: ColorLabel = c === 'none' ? null : c
-                    const isActive = form.color_label === val
+                    const isActive = form.colorLabel === val
                     return (
                       <button
                         key={c}
                         type="button"
-                        onClick={() => setForm((f) => ({ ...f, color_label: val }))}
+                        onClick={() => setForm((f) => ({ ...f, colorLabel: val }))}
                         className={`w-8 h-8 rounded-lg border-2 ${colorSwatch[c].bar} ${
                           isActive ? 'border-ink' : 'border-transparent'
                         } transition-colors`}
