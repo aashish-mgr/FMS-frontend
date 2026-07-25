@@ -4,6 +4,7 @@ import IncomePage from './pages/accountant/Income'
 import ExpensePage from './pages/accountant/Expense'
 import NotesPage from './pages/accountant/Notes'
 import RemindersPage from './pages/accountant/Reminders'
+import AuditLog from './pages/accountant/AuditLog'
 import store from './store'
 import { Provider } from 'react-redux'
 
@@ -26,6 +27,7 @@ function App() {
         <Route path='/expense' element= {<ExpensePage />} />
         <Route path='/notes' element= {<NotesPage />} />
         <Route path='/reminders' element= {<RemindersPage />} />
+        <Route path='/audit' element= {<AuditLog />} />
         </Routes>
     </BrowserRouter>
     

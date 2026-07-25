@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
   { icon: LayoutGrid, label: 'Dashboard' ,active: false},
   { icon: ArrowDownCircle, label: 'Income' , active: false},
   { icon: ArrowUpCircle, label: 'Expense', active:false},
-  { icon: FileBarChart2, label: 'Reports',active: false },
+  { icon: FileBarChart2, label: 'Audit',active: false },
   { icon: BellRing, label: 'Reminders', badge: 7 ,active: false},
   { icon: StickyNote, label: 'Notes' ,active: false}
 ]
