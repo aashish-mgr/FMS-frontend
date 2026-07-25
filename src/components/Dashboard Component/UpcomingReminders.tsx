@@ -4,6 +4,7 @@ import type { Priority } from '../../types/dashboardTypes'
 
 
 import { useGetUpcomingRemindersQuery } from '../../store/api/dashboardApi'
+import { useMarkCompleteMutation } from '../../store/api/remainderApi'
 
 const priorityStyle: Record<Priority, string> = {
   HIGH: 'bg-negative-soft text-negative',
@@ -13,8 +14,9 @@ const priorityStyle: Record<Priority, string> = {
 
 export default function UpcomingReminders() {
   // const [upcomingReminders, setUpcomingReminders] = useState<remainderType[] > ([]);
-    const {data: upcomingReminders, isLoading} = useGetUpcomingRemindersQuery(undefined, {refetchOnMountOrArgChange: true})
+    const {data: upcomingReminders,refetch, isLoading} = useGetUpcomingRemindersQuery(undefined, {refetchOnMountOrArgChange: true})
     console.log(upcomingReminders)
+    const [updateComplete] = useMarkCompleteMutation();
   // const getRemainders = async () => {
   //   refetchReminder();
   //   setUpcomingReminders(reminderData?.records ?? []);
@@ -23,6 +25,10 @@ export default function UpcomingReminders() {
   // useEffect(() => {
   //  getRemainders();
   // }, [])
+    const markComplete = (id: string) => {
+          updateComplete(id);
+          refetch();
+    }
   
   return (
     <div className="bg-card rounded-xl border border-line shadow-card animate-rise">
@@ -36,7 +42,7 @@ export default function UpcomingReminders() {
      {isLoading ? (<p>Loading...</p>) : (<ul className="divide-y divide-line">
         {upcomingReminders?.map((r) => (
           <li key={r.id} className="px-5 py-3.5 flex items-start gap-3">
-            <button className="mt-0.5 grid place-items-center w-5 h-5 rounded-full border-2 border-line hover:border-positive hover:bg-positive-soft shrink-0 transition-colors">
+            <button onClick={() => markComplete(r.id)} className="mt-0.5 grid place-items-center w-5 h-5 rounded-full border-2 border-line hover:border-positive hover:bg-positive-soft shrink-0 transition-colors">
               <Check size={11} className="opacity-0 hover:opacity-100 text-positive" strokeWidth={3} />
             </button>
             <div className="flex-1 min-w-0">
