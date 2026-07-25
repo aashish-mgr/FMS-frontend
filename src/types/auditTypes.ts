@@ -48,19 +48,29 @@ export const ENTITY_TYPES: EntityType[] = ['income', 'expense', 'note', 'reminde
 // SRS 14.1 — Audit Log Table Schema
 export interface AuditLogRecord {
   id: string
-  user_id: string | null
+  userId: string | null
   // Display-only convenience field — the real API would join this from the users table.
-  user_name: string | null
+  userName: string | null
   action: AuditAction
-  entity_type: EntityType
-  entity_id: string | null
-  old_values: Record<string, unknown> | null
-  new_values: Record<string, unknown> | null
-  ip_address: string | null
-  created_at: string
+  entityType: EntityType
+  entityId: string | null
+  oldValues: Record<string, unknown> | null
+  newValues: Record<string, unknown> | null
+  ipAddress: string | null
+  createdAt: string
 }
 
 export interface DateRange {
   from: string
   to: string
+}
+
+export interface AuditResponse {
+  records: AuditLogRecord[],
+  meta: {
+    page: number,
+    limit: number,
+    total: number,
+    totalPages: number
+  }
 }

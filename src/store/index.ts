@@ -7,6 +7,7 @@ import { expenseApi } from './api/expenseApi';
 import { dashboardApi } from './api/dashboardApi';
 import { noteApi } from './api/notesApi';
 import { reminderApi } from './api/remainderApi';
+import { auditApi } from './api/auditApi';
 const store = configureStore({
   reducer: {
    auth: authSlice,
@@ -16,7 +17,8 @@ const store = configureStore({
     [expenseApi.reducerPath]: expenseApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [noteApi.reducerPath]: noteApi.reducer,
-    [reminderApi.reducerPath]: reminderApi.reducer
+    [reminderApi.reducerPath]: reminderApi.reducer,
+    [auditApi.reducerPath]: auditApi.reducer
   },
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -26,7 +28,8 @@ const store = configureStore({
       expenseApi.middleware,
       dashboardApi.middleware,
       noteApi.middleware,
-      reminderApi.middleware
+      reminderApi.middleware,
+      auditApi.middleware
     ),
 })
 

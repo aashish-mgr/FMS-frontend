@@ -6,6 +6,7 @@ import Topbar from '../../components/Topbar'
 import { generateAuditLogs } from '../../data/AuditDummyData'
 import { AUDIT_ACTIONS, ENTITY_TYPES } from '../../types/auditTypes'
 import type { AuditLogRecord, AuditAction, EntityType, DateRange } from '../../types/auditTypes'
+import { useGetAllQuery } from '../../store/api/auditApi'
 
 const PAGE_SIZE = 15
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -84,7 +85,8 @@ function JsonBlock({ label, value }: { label: string; value: Record<string, unkn
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function AuditLog() {
-  const [logs] = useState<AuditLogRecord[]>(() => generateAuditLogs())
+  const {data , refetch, isLoading} = useGetAllQuery();
+  const logs = data?.records;
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [entityFilter, setEntityFilter] = useState<'all' | EntityType>('all')
@@ -93,27 +95,27 @@ export default function AuditLog() {
   const [viewingLog, setViewingLog] = useState<AuditLogRecord | null>(null)
 
   const filtered = useMemo(() => {
-    return logs.filter((l) => {
-      if (entityFilter !== 'all' && l.entity_type !== entityFilter) return false
+    return logs?.filter((l) => {
+      if (entityFilter !== 'all' && l.entityType !== entityFilter) return false
       if (actionFilter !== 'all' && l.action !== actionFilter) return false
-      const logDate = l.created_at.slice(0, 10)
+      const logDate = l.createdAt.slice(0, 10)
       if (dateRange.from && logDate < dateRange.from) return false
       if (dateRange.to && logDate > dateRange.to) return false
       if (search.trim()) {
         const q = search.trim().toLowerCase()
-        const haystack = [l.user_name, l.entity_id, l.ip_address, l.action].filter(Boolean).join(' ').toLowerCase()
+        const haystack = [l.userName, l.entityId, l.ipAddress, l.action].filter(Boolean).join(' ').toLowerCase()
         if (!haystack.includes(q)) return false
       }
       return true
-    })
+    }) ?? []
   }, [logs, entityFilter, actionFilter, dateRange, search])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(Number(filtered?.length) / PAGE_SIZE))
+  const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const todaysEventCount = logs.filter((l) => l.created_at.slice(0, 10) === TODAY).length
-  const failedLoginCount = logs.filter((l) => l.action === 'USER_LOGIN_FAILED').length
-  const deletionCount = logs.filter((l) => l.action.endsWith('DELETED')).length
+  const todaysEventCount = logs?.filter((l) => l.createdAt.slice(0, 10) === TODAY).length
+  const failedLoginCount = logs?.filter((l) => l.action === 'USER_LOGIN_FAILED').length
+  const deletionCount = logs?.filter((l) => l.action.endsWith('DELETED')).length
 
   function clearFilters() {
     setSearch('')
@@ -172,7 +174,7 @@ export default function AuditLog() {
                 }}
               >
                 <option value="all">All Entities</option>
-                {ENTITY_TYPES.map((e) => (
+                {ENTITY_TYPES.map((e: string ) => (
                   <option key={e} value={e}>
                     {e.charAt(0).toUpperCase() + e.slice(1)}
                   </option>
@@ -232,7 +234,7 @@ export default function AuditLog() {
           {/* Table */}
           <div className="bg-card rounded-xl border border-line shadow-card overflow-hidden animate-rise">
             <div className="px-5 py-3 border-b border-line flex items-center justify-between">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted">Audit Log · {filtered.length} events</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted">Audit Log · {filtered?.length} events</p>
             </div>
 
             <div className="overflow-x-auto">
@@ -248,29 +250,29 @@ export default function AuditLog() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paged.length === 0 && (
+                  {paged?.length === 0 && (
                     <tr>
                       <td colSpan={6} className="px-5 py-10 text-center text-sm text-muted">
                         No audit events match the current filters.
                       </td>
                     </tr>
                   )}
-                  {paged.map((l) => {
+                  {paged?.map((l) => {
                     const t = toneMap[actionTone(l.action)]
                     return (
                       <tr key={l.id} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
-                        <td className="px-5 py-3 font-mono tabular text-xs text-muted whitespace-nowrap">{formatTimestamp(l.created_at)}</td>
-                        <td className="px-5 py-3 text-ink">{l.user_name ?? <span className="text-muted">System</span>}</td>
+                        <td className="px-5 py-3 font-mono tabular text-xs text-muted whitespace-nowrap">{formatTimestamp(l.createdAt)}</td>
+                        <td className="px-5 py-3 text-ink">{l.userName ?? <span className="text-muted">System</span>}</td>
                         <td className="px-5 py-3">
                           <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium font-mono ${t.bg} ${t.text}`}>
                             {l.action}
                           </span>
                         </td>
                         <td className="px-5 py-3 text-muted">
-                          {l.entity_type}
-                          {l.entity_id && <span className="text-xs text-line ml-1">#{l.entity_id.split('-').pop()}</span>}
+                          {l.entityType}
+                          {l.entityId && <span className="text-xs text-line ml-1">#{l.entityId.split('-').pop()}</span>}
                         </td>
-                        <td className="px-5 py-3 font-mono text-xs text-muted">{l.ip_address ?? '—'}</td>
+                        <td className="px-5 py-3 font-mono text-xs text-muted">{l.ipAddress ?? '—'}</td>
                         <td className="px-5 py-3 text-right">
                           <button
                             onClick={() => setViewingLog(l)}
@@ -289,8 +291,8 @@ export default function AuditLog() {
 
             <div className="px-5 py-3 border-t border-line flex items-center justify-between">
               <span className="font-mono tabular text-[11px] text-muted">
-                Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of{' '}
-                {filtered.length}
+                Showing {filtered?.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, Number(filtered?.length))} of{' '}
+                {filtered?.length}
               </span>
               <div className="flex items-center gap-1">
                 <button
@@ -335,31 +337,31 @@ export default function AuditLog() {
                 </div>
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted">Timestamp</p>
-                  <p className="font-mono tabular text-sm text-ink mt-1">{formatTimestamp(viewingLog.created_at)}</p>
+                  <p className="font-mono tabular text-sm text-ink mt-1">{formatTimestamp(viewingLog.createdAt)}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted">User</p>
-                  <p className="text-sm text-ink mt-1">{viewingLog.user_name ?? 'System'}</p>
+                  <p className="text-sm text-ink mt-1">{viewingLog.userName ?? 'System'}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted">IP Address</p>
-                  <p className="font-mono text-sm text-ink mt-1">{viewingLog.ip_address ?? '—'}</p>
+                  <p className="font-mono text-sm text-ink mt-1">{viewingLog.ipAddress ?? '—'}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted">Entity Type</p>
-                  <p className="text-sm text-ink mt-1 capitalize">{viewingLog.entity_type}</p>
+                  <p className="text-sm text-ink mt-1 capitalize">{viewingLog.entityType}</p>
                 </div>
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-wide text-muted">Entity ID</p>
-                  <p className="font-mono text-sm text-ink mt-1">{viewingLog.entity_id ?? '—'}</p>
+                  <p className="font-mono text-sm text-ink mt-1">{viewingLog.entityId ?? '—'}</p>
                 </div>
               </div>
 
               <div className="ledger-stitch" />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <JsonBlock label="Before" value={viewingLog.old_values} />
-                <JsonBlock label="After" value={viewingLog.new_values} />
+                <JsonBlock label="Before" value={viewingLog.oldValues} />
+                <JsonBlock label="After" value={viewingLog.newValues} />
               </div>
             </div>
 
