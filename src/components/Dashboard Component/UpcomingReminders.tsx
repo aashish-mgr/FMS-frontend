@@ -13,7 +13,7 @@ const priorityStyle: Record<Priority, string> = {
 
 export default function UpcomingReminders() {
   // const [upcomingReminders, setUpcomingReminders] = useState<remainderType[] > ([]);
-    const {data: upcomingReminders, refetch: refetchReminder, isLoading} = useGetUpcomingRemindersQuery()
+    const {data: upcomingReminders, isLoading} = useGetUpcomingRemindersQuery(undefined, {refetchOnMountOrArgChange: true})
     console.log(upcomingReminders)
   // const getRemainders = async () => {
   //   refetchReminder();
