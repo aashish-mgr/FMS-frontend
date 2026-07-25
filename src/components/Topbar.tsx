@@ -1,7 +1,7 @@
 import { Search, Menu } from 'lucide-react'
 // import { currentUser } from '../data/dummyData'
 import { useSelector } from 'react-redux'
-import { useEffect } from 'react'
+
 
 const today = new Date('2026-07-14T00:00:00').toLocaleDateString('en-GB', {
   weekday: 'long',

@@ -1,6 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { TooltipProps } from "recharts";
-import { npr } from "../../data/dummyData";
+import { npr } from "../../lib/format";
 import type {  DonutTone } from "../../types/dashboardTypes";
 import { useState } from "react";
 import {

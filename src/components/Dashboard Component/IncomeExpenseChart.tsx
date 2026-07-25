@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { barChartData, npr } from '../../data/dummyData'
+import { npr } from '../../lib/format'
 import type { BarDatum,  BarRange } from '../../types/dashboardTypes'
 import {useGetIncomeExpenseChartQuery} from '../../store/api/dashboardApi'
 

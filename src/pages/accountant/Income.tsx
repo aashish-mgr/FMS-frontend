@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import { npr } from '../../data/dummyData'
+import { npr } from '../../lib/format'
 
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { IncomeRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'

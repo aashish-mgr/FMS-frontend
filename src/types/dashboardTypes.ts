@@ -19,6 +19,13 @@ export interface KpiPeriod {
   label: string
 }
 
+export const kpiPeriods: KpiPeriod[] = [
+  { key: 'today', label: 'Today' },
+  { key: 'week', label: 'This Week' },
+  { key: 'month', label: 'This Month' },
+  { key: 'year', label: 'This Year' }
+]
+
 export type BarRange = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 export interface BarDatum {

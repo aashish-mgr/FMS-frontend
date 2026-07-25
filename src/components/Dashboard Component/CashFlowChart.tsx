@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import type { TooltipProps } from 'recharts'
-import { cashFlowByYear, npr } from '../../data/dummyData'
+import { npr } from '../../lib/format'
 import { useGetMonthlyCashFlowQuery } from '../../store/api/dashboardApi'
 import type{ CashFlowDatum } from '../../types/dashboardTypes'
 

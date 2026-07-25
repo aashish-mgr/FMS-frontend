@@ -3,7 +3,6 @@ import type { ComponentType } from 'react'
 import { Plus, Search, Pencil, Trash2, X, Pin, Archive, ArchiveRestore, StickyNote } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import { generateNotes } from '../../data/NoteReminderData'
 import type { NoteRecord, ColorLabel, Note, UpdateNoteInput, CreateNoteInput } from '../../types/notesTypes'
 import { useCreateNoteMutation, useDeleteNoteMutation, useGetAllQuery, useToggleArchiveMutation, useTogglePinMutation, useUpdateNoteMutation } from '../../store/api/notesApi'
 

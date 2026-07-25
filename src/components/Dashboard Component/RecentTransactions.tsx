@@ -1,5 +1,5 @@
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
-import { recentTransactions, npr } from '../../data/dummyData'
+import { npr } from '../../lib/format'
 import { formatDate } from '../../lib/format'
 import {useGetRecentTransactionsQuery} from '../../store/api/dashboardApi'
 import { useEffect, useState } from 'react'

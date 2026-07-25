@@ -15,9 +15,7 @@ import {
 } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
-import { npr } from "../../data/dummyData";
-import { generateExpenseRecords } from "../../data/ledgerDummyData";
-import type { Category } from "../../types/ledgerTypes";
+import { npr } from "../../lib/format";
 import { paymentMethods } from "../../types/ledgerTypes";
 import type {
   ExpenseRecord,

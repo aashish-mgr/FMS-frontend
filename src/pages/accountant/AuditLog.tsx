@@ -3,7 +3,6 @@ import type { ComponentType } from 'react'
 import { Search, X, ChevronLeft, ChevronRight, Eye, Activity, ShieldAlert, Trash2 } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import { generateAuditLogs } from '../../data/AuditDummyData'
 import { AUDIT_ACTIONS, ENTITY_TYPES } from '../../types/auditTypes'
 import type { AuditLogRecord, AuditAction, EntityType, DateRange } from '../../types/auditTypes'
 import { useGetAllQuery } from '../../store/api/auditApi'
@@ -85,7 +84,7 @@ function JsonBlock({ label, value }: { label: string; value: Record<string, unkn
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function AuditLog() {
-  const {data , refetch, isLoading} = useGetAllQuery();
+  const {data , refetch, isLoading} = useGetAllQuery(undefined,{refetchOnMountOrArgChange: true});
   const logs = data?.records;
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -114,6 +113,7 @@ export default function AuditLog() {
   const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const todaysEventCount = logs?.filter((l) => l.createdAt.slice(0, 10) === TODAY).length
+  console.log(logs?.filter((l) => l.createdAt.slice(0, 10) === TODAY))
   const failedLoginCount = logs?.filter((l) => l.action === 'USER_LOGIN_FAILED').length
   const deletionCount = logs?.filter((l) => l.action.endsWith('DELETED')).length
 
@@ -249,7 +249,7 @@ export default function AuditLog() {
                     <th className="px-5 py-2.5 text-[11px] font-medium uppercase tracking-wide text-muted text-right">Details</th>
                   </tr>
                 </thead>
-                <tbody>
+                {isLoading ? (<p>Loading...</p>) : (<tbody>
                   {paged?.length === 0 && (
                     <tr>
                       <td colSpan={6} className="px-5 py-10 text-center text-sm text-muted">
@@ -285,7 +285,8 @@ export default function AuditLog() {
                       </tr>
                     )
                   })}
-                </tbody>
+                </tbody>)}
+                
               </table>
             </div>
 

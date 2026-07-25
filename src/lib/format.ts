@@ -17,3 +17,8 @@ export const dueLabel = (isoDate: string): string => {
   if (d < 0) return `${Math.abs(d)}d overdue`
   return `In ${d} days`
 }
+
+export const npr = (value: number): string =>
+  new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 })
+    .format(value)
+    .replace('NPR', 'Rs.')

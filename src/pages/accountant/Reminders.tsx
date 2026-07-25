@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import { generateReminders } from '../../data/NoteReminderData'
 import { PRIORITIES, REPEAT_CYCLES } from '../../types/remainderTypes'
 import type { ReminderRecord, Priority, ReminderStatus, RepeatCycle, DateRange, remainderType } from '../../types/remainderTypes'
 import { useCreateReminderMutation, useDeleteReminderMutation, useGetRemindersQuery, useMarkCompleteMutation, useUpdateReminderMutation } from '../../store/api/remainderApi'
