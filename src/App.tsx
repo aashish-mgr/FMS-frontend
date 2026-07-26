@@ -5,16 +5,23 @@ import ExpensePage from './pages/accountant/Expense'
 import NotesPage from './pages/accountant/Notes'
 import RemindersPage from './pages/accountant/Reminders'
 import AuditLog from './pages/accountant/AuditLog'
+import ReportsPage from './pages/accountant/Report'
 import store from './store'
 import { Provider } from 'react-redux'
+import { useEffect } from 'react'
 
 
 
 import './App.css'
 import Login from './pages/Login'
+import { useRefreshMutation } from './store/api/authApi'
 
 function App() {
-
+  // const [refresh] = useRefreshMutation();
+  // useEffect(() => {
+  //    refresh();
+  // }, [])
+  
 
   return (
     <>
@@ -28,6 +35,7 @@ function App() {
         <Route path='/notes' element= {<NotesPage />} />
         <Route path='/reminders' element= {<RemindersPage />} />
         <Route path='/audit' element= {<AuditLog />} />
+        <Route path='/report' element= {<ReportsPage />} />
         </Routes>
     </BrowserRouter>
     

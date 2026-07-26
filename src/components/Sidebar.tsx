@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { icon: ArrowDownCircle, label: 'Income' , active: false},
   { icon: ArrowUpCircle, label: 'Expense', active:false},
   { icon: FileBarChart2, label: 'Audit',active: false },
+  { icon: FileBarChart2, label: 'Report',active: false },
   { icon: BellRing, label: 'Reminders', badge: 7 ,active: false},
   { icon: StickyNote, label: 'Notes' ,active: false}
 ]
@@ -36,17 +37,19 @@ export default function Sidebar() {
   const location = useLocation();
   const [logout] = useLogoutMutation();
   const dispatch = useDispatch();
-  const handleLogout =async () => {
-    logout();
+ const handleLogout = async () => {
+  try {
+    await logout().unwrap();
+  } finally {
     dispatch(clearAuth());
-    console.log(authState)
-}
+  }
+};
 const authState = useSelector((state: any) => state.auth);
 useEffect(() => {
-  if(authState.isAuthenticated === false) {
-    navigate("/")
+  if (!authState.isAuthenticated) {
+    navigate("/");
   }
-}, [authState])
+}, [authState.isAuthenticated, navigate]);
 
 const handleNavigate = async (label: string) => {
     const newLabel =label.toLowerCase();
