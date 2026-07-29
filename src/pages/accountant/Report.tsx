@@ -153,8 +153,8 @@ export default function ReportsPage() {
     [dateRange, categoryFilter, paymentFilter, reportType]
   )
 
-  const totalIncome = filteredIncome?.reduce((s, r) => s + r.amount, 0)
-  const totalExpense = filteredExpense?.reduce((s, r) => s + r.amount, 0)
+  const totalIncome = filteredIncome?.reduce((s, r) => s + Number(r.amount), 0)
+  const totalExpense = filteredExpense?.reduce((s, r) => s + Number(r.amount), 0)
   const netProfit = Number(totalIncome) - Number(totalExpense);
 
   /* ---- Category Income / Category Expense (SRS: Category, Count, Total, % Share) ---- */
@@ -294,7 +294,7 @@ export default function ReportsPage() {
                     <button
                       key={fmt}
                       onClick={() => handleExport(fmt)}
-                      className="block w-full text-left px-3 py-1.5 text-xs uppercase tracking-wide text-muted hover:text-ink hover:bg-paper"
+                      className="block w-full text-left px-3 py-1.5 text-xs uppercase tracking-wide text-muted hover:text-ink hover:bg-paper z-20"
                     >
                       {fmt}
                     </button>
@@ -305,7 +305,7 @@ export default function ReportsPage() {
           </section>
 
           {/* Report type tabs */}
-          <div className="flex flex-wrap bg-card border border-line rounded-lg p-1 gap-0.5 animate-rise">
+          <div className="flex flex-wrap bg-card border border-line rounded-lg p-1 gap-0.5 animate-rise ">
             {REPORT_TABS.map((t) => (
               <button
                 key={t.key}
