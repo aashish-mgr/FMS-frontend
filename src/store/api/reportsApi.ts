@@ -6,21 +6,21 @@ export const reportApi = createApi({
     reducerPath: "reportApi",
     baseQuery: axiosBaseQuery(),
     endpoints: (builder) => ({
-        getIncomeReport: builder.query({
+        getIncomeReport: builder.query<undefined,string>({
             query: (format: format) => ( {
                 url: "/report/income",
                 method: "GET",
                 params: {format}
             })
         }),
-        getExpenseReport: builder.query({
+        getExpenseReport: builder.query<undefined,string>({
             query: (format: format) => ({
                 url:"/report/expense",
                 method: "GET",
                 params: {format}
             })
         }),
-        getProfitLossReport: builder.query({
+        getProfitLossReport: builder.query<undefined,string>({
             query: (format: format) => ({
                 url: "/report/profit-loss",
                 method: "GET",

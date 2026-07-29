@@ -11,6 +11,7 @@ import { useGetExpenseCategoryQuery, useGetIncomeCategoryQuery } from '../../sto
 import { useGetAllQuery  as getIncome} from '../../store/api/incomeApi'
 import { useGetAllQuery as getExpense } from '../../store/api/expenseApi'
 import type { Category } from '../../types/categoryTypes'
+import { useGetIncomeReportQuery, useGetExpenseReportQuery,useGetProfitLossReportQuery } from '../../store/api/reportsApi'
 
 type Tone = 'positive' | 'negative' | 'indigo' | 'amber'
 
@@ -102,6 +103,8 @@ export default function ReportsPage() {
     const {data: expenseCategories} = useGetExpenseCategoryQuery();
     const {data: incomePool} = getIncome();
     const {data: expensePool} = getExpense();
+    
+
   const [reportType, setReportType] = useState<ReportType>('income')
   const [dateRange, setDateRange] = useState({ from: '', to: '' })
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -262,7 +265,10 @@ export default function ReportsPage() {
   const pagedExpense = filteredExpense?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function handleExport(format: ExportFormat) {
-    // Wire to the matching report endpoint (SRS 11.3) with format=pdf|excel|csv once the API is live.
+    if(reportType === "income") {
+      const {data}  = useGetIncomeReportQuery(format);
+    }
+    
     console.log(`Exporting "${reportType}" report as ${format}`)
     setExportOpen(false)
   }
