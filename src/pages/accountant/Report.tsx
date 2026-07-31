@@ -266,7 +266,7 @@ export default function ReportsPage() {
 
   function handleExport(format: ExportFormat) {
     if(reportType === "income") {
-      const {data}  = useGetIncomeReportQuery(format);
+      
     }
     
     console.log(`Exporting "${reportType}" report as ${format}`)
@@ -295,7 +295,7 @@ export default function ReportsPage() {
                 <Download size={14} /> Export Report
               </button>
               {exportOpen && (
-                <div className="absolute right-0 mt-1 w-32 bg-card border border-line rounded-lg shadow-panel py-1 z-10">
+                <div className="absolute right-0 mt-1 w-32 bg-card border border-line rounded-lg shadow-panel py-1 z-[999]">
                   {(['pdf', 'excel', 'csv'] as const).map((fmt) => (
                     <button
                       key={fmt}
@@ -311,7 +311,7 @@ export default function ReportsPage() {
           </section>
 
           {/* Report type tabs */}
-          <div className="flex flex-wrap bg-card border border-line rounded-lg p-1 gap-0.5 animate-rise ">
+          <div className="flex flex-wrap bg-card border border-line rounded-lg p-1 gap-0.5 ">
             {REPORT_TABS.map((t) => (
               <button
                 key={t.key}

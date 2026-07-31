@@ -1,30 +1,30 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
-import type {format} from "../../types/reportTypes";
+import type {IncomeExpenseReportParams} from "../../types/reportTypes";
 
 export const reportApi = createApi({
     reducerPath: "reportApi",
     baseQuery: axiosBaseQuery(),
     endpoints: (builder) => ({
-        getIncomeReport: builder.query<undefined,string>({
-            query: (format: format) => ( {
+        getIncomeReport: builder.query<any,IncomeExpenseReportParams>({
+            query: (params) => ( {
                 url: "/report/income",
                 method: "GET",
-                params: {format}
+                params: {params}
             })
         }),
-        getExpenseReport: builder.query<undefined,string>({
-            query: (format: format) => ({
+        getExpenseReport: builder.query<any,IncomeExpenseReportParams>({
+            query: (params) => ({
                 url:"/report/expense",
                 method: "GET",
-                params: {format}
+                params: {params}
             })
         }),
-        getProfitLossReport: builder.query<undefined,string>({
-            query: (format: format) => ({
+        getProfitLossReport: builder.query<any,IncomeExpenseReportParams>({
+            query: (params) => ({
                 url: "/report/profit-loss",
                 method: "GET",
-                params: {format}
+                params: {params}
             })
         })
     })

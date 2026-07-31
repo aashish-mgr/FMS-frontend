@@ -47,9 +47,9 @@ interface SummaryCardProps {
 function SummaryCard({ label, value, tone, Icon }: SummaryCardProps) {
   const t = toneMap[tone]
   return (
-    <div className="relative flex-1 bg-card rounded-xl border border-line shadow-card p-5 overflow-hidden">
+    <div className="relative flex-1 bg-card rounded-xl border border-line shadow-card p-5 overflow-visible ">
       <div className="ledger-stitch absolute top-0 left-0 right-0" />
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between">  
         <p className="text-xs font-medium uppercase tracking-wide text-muted">{label}</p>
         <div className={`grid place-items-center w-8 h-8 rounded-lg ${t.bg} ring-1 ${t.ring}`}>
           <Icon size={15} className={t.text} strokeWidth={2.2} />
@@ -295,7 +295,7 @@ export default function IncomePage() {
                   <Download size={14} /> Export
                 </button>
                 {exportOpen && (
-                  <div className="absolute right-0 mt-1 w-32 bg-card border border-line rounded-lg shadow-panel py-1 z-10">
+                  <div className="absolute right-0 mt-1 w-32 bg-card border border-line rounded-lg shadow-panel py-1 z-999">
                     {(['pdf', 'excel', 'csv'] as const).map((fmt) => (
                       <button
                         key={fmt}
