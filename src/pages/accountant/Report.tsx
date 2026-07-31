@@ -11,7 +11,8 @@ import { useGetExpenseCategoryQuery, useGetIncomeCategoryQuery } from '../../sto
 import { useGetAllQuery  as getIncome} from '../../store/api/incomeApi'
 import { useGetAllQuery as getExpense } from '../../store/api/expenseApi'
 import type { Category } from '../../types/categoryTypes'
-import { useGetIncomeReportQuery, useGetExpenseReportQuery,useGetProfitLossReportQuery } from '../../store/api/reportsApi'
+import type { ReportType } from '../../types/reportTypes'
+import { useGetIncomeReportQuery, useGetExpenseReportQuery,useGetProfitLossReportQuery, useDownloadReportMutation } from '../../store/api/reportsApi'
 
 type Tone = 'positive' | 'negative' | 'indigo' | 'amber'
 
@@ -22,17 +23,16 @@ const toneMap: Record<Tone, { text: string; bg: string; ring: string }> = {
   amber: { text: 'text-amber', bg: 'bg-amber-soft', ring: 'ring-amber/15' }
 }
 
-// SRS 11.1 — Report Types
-type ReportType = 'income' | 'expense' | 'pnl' | 'category_income' | 'category_expense' | 'monthly' | 'yearly'
+
 
 const REPORT_TABS: { key: ReportType; label: string }[] = [
   { key: 'income', label: 'Income Report' },
   { key: 'expense', label: 'Expense Report' },
-  { key: 'pnl', label: 'Profit & Loss' },
-  { key: 'category_income', label: 'Category Income' },
-  { key: 'category_expense', label: 'Category Expense' },
-  { key: 'monthly', label: 'Monthly Summary' },
-  { key: 'yearly', label: 'Yearly Summary' }
+  { key: 'profit-loss', label: 'Profit & Loss' },
+  { key: 'category-income', label: 'Category Income' },
+  { key: 'category-expense', label: 'Category Expense' },
+  { key: 'monthly-summary', label: 'Monthly Summary' },
+  { key: 'yearly-summary', label: 'Yearly Summary' }
 ]
 
 type GroupBy = 'daily' | 'monthly' | 'yearly'
@@ -103,6 +103,8 @@ export default function ReportsPage() {
     const {data: expenseCategories} = useGetExpenseCategoryQuery();
     const {data: incomePool} = getIncome();
     const {data: expensePool} = getExpense();
+
+
     
 
   const [reportType, setReportType] = useState<ReportType>('income')
@@ -115,9 +117,9 @@ export default function ReportsPage() {
   const [expandedYear, setExpandedYear] = useState<string | null>(null)
 
   const showsIncomeExpenseFilters = reportType === 'income' || reportType === 'expense'
-  const showsGroupBy = reportType === 'pnl'
+  const showsGroupBy = reportType === 'profit-loss'
 
-  const activeCategories = reportType === 'expense' || reportType === 'category_expense' ? expenseCategories : incomeCategories
+  const activeCategories = reportType === 'expense' || reportType === 'category-expense' ? expenseCategories : incomeCategories
 
   // Reset page + category filter cleanly whenever the report type changes.
   function selectReport(type: ReportType) {
@@ -162,9 +164,9 @@ export default function ReportsPage() {
 
   /* ---- Category Income / Category Expense (SRS: Category, Count, Total, % Share) ---- */
   const categoryRows = useMemo(() => {
-    const records = reportType === 'category_income' ? filteredIncome : filteredExpense
-    const categories = reportType === 'category_income' ? incomeCategories : expenseCategories
-    const catKey = reportType === 'category_income' ? 'incomeCategoryId' : 'expenseCategoryId'
+    const records = reportType === 'category-income' ? filteredIncome : filteredExpense
+    const categories = reportType === 'category-income' ? incomeCategories : expenseCategories
+    const catKey = reportType === 'category-income' ? 'incomeCategoryId' : 'expenseCategoryId'
     const totals = new Map<string, { count: number; amount: number }>()
 
     records?.forEach((r: any) => {
@@ -264,13 +266,27 @@ export default function ReportsPage() {
   const pagedIncome = filteredIncome?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const pagedExpense = filteredExpense?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  function handleExport(format: ExportFormat) {
-    if(reportType === "income") {
-      
+  const [downloadReport, { isLoading: isDownloading }] =
+    useDownloadReportMutation();
+
+  async function handleExport(format: ExportFormat) {
+   try {
+      await downloadReport({
+        reportType: reportType,
+        format,
+        params: {
+          from: dateRange.from,
+          to: dateRange.to
+        },
+      }).unwrap();
+      // triggerBrowserDownload already ran inside the mutation's
+      // responseHandler — nothing else to do here on success.
+      setExportOpen(false)
+    } catch (err) {
+      console.error("Report download failed:", err);
+      // surface a toast/notification here
     }
     
-    console.log(`Exporting "${reportType}" report as ${format}`)
-    setExportOpen(false)
   }
 
   return (
@@ -487,7 +503,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {reportType === 'pnl' && (
+              {reportType === 'profit-loss' && (
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-line">
@@ -517,7 +533,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {(reportType === 'category_income' || reportType === 'category_expense') && (
+              {(reportType === 'category-income' || reportType === 'category-expense') && (
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-line">
@@ -530,7 +546,7 @@ export default function ReportsPage() {
                   <tbody>
                     {categoryRows?.length === 0 && <EmptyRow colSpan={4} />}
                     {categoryRows?.map((row) => {
-                      const tone = reportType === 'category_income' ? 'text-positive' : 'text-negative'
+                      const tone = reportType === 'category-income' ? 'text-positive' : 'text-negative'
                       return (
                         <tr key={row.categoryId} className="border-b border-line last:border-0 hover:bg-paper/60 transition-colors">
                           <Td className="text-ink">{row.name}</Td>
@@ -550,7 +566,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {reportType === 'monthly' && (
+              {reportType === 'monthly-summary' && (
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-line">
@@ -580,7 +596,7 @@ export default function ReportsPage() {
                 </table>
               )}
 
-              {reportType === 'yearly' && (
+              {reportType === 'yearly-summary' && (
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-line">

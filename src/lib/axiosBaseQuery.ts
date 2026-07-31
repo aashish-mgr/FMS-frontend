@@ -1,5 +1,5 @@
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
-import type { AxiosError, AxiosRequestConfig } from "axios";
+import type { AxiosError, AxiosRequestConfig ,AxiosResponse} from "axios";
 
 import axios from "axios";
 import axiosInstance from "./axios";
@@ -13,7 +13,15 @@ type AxiosBaseQueryArgs = {
   data?: AxiosRequestConfig["data"];
   params?: AxiosRequestConfig["params"];
   headers?: AxiosRequestConfig["headers"];
+  responseType?: AxiosRequestConfig["responseType"];
 };
+
+function unwrapResult(result: AxiosResponse, args: AxiosBaseQueryArgs) {
+  if (args.responseType === "blob" || args.responseType === "arraybuffer") {
+    return result;
+  }
+  return result.data?.data;
+}
 
 export const axiosBaseQuery =
   (): BaseQueryFn<
@@ -32,6 +40,7 @@ export const axiosBaseQuery =
         method: args.method ?? "GET",
         data: args.data,
         params: args.params,
+        responseType: args.responseType,
         headers: {
           ...args.headers,
           ...(token
@@ -43,7 +52,7 @@ export const axiosBaseQuery =
       });
 
       return {
-        data: result.data?.data,
+        data:  unwrapResult(result, args),
       };
     } catch (error) {
       const err = error as AxiosError;
@@ -68,6 +77,7 @@ export const axiosBaseQuery =
             method: args.method ?? "GET",
             data: args.data,
             params: args.params,
+            responseType: args.responseType,
             headers: {
               ...args.headers,
               Authorization: `Bearer ${newAccessToken}`,
@@ -75,7 +85,7 @@ export const axiosBaseQuery =
           });
 
           return {
-            data: retryResult.data?.data,
+            data:unwrapResult(retryResult, args),
           };
         } catch {
           api.dispatch(clearAuth());
