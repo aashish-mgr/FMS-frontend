@@ -1,21 +1,40 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { AuthUser } from "../api/authApi";
+import axios from "axios";
 
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  isInitializing: boolean;
 }
 
 
 const initialState: AuthState = {
   user: null,
   accessToken: null,
-  isAuthenticated: false
+  isAuthenticated: false,
+  isInitializing: true
 };
 
-
+export const initializeAuth = createAsyncThunk(
+  "auth/initialize",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+       "http://localhost:3000/api/auth/refresh",
+        {},
+        { withCredentials: true }
+      );
+      const accessToken = response.data?.data?.accessToken;
+      if (!accessToken) throw new Error("No token in refresh response");
+      return accessToken;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
 
 
 
@@ -42,59 +61,22 @@ const authSlice = createSlice({
       state.accessToken = null;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(initializeAuth.fulfilled, (state, action) => {
+        state.accessToken = action.payload;
+        state.isAuthenticated = true;
+        state.isInitializing = false;
+      })
+      .addCase(initializeAuth.rejected, (state) => {
+        state.accessToken = null;
+        state.isAuthenticated = false;
+        state.isInitializing = false;
+      });
+  },
 });
 
-// export const loginUser = (userData: loginData) => {
- 
-//   return async function loginUserThunk(dispatch: Dispatch) {
-//       try {
-//          const [login] = useLoginMutation();
-//          const res = await login(userData);
-//         console.log(res);
-//         if(res.error){
-//           alert("Login Failed.")
-         
-//         }
-//         else {
-//            dispatch(setAuthCredentials(res.data?.user));
-//           // dispatch(setRole(res.data?.user?.userRole?.roles?.roleName))
-//           dispatch(setAccessToken(res.data?.accessToken));
-//           dispatch(setIsAuthenticated(true));
-//         }
-//       }
-//       catch(err) {
-//         alert("login failed");
-//         console.error(err);
-//       }
-//   }
-// }
 
-
-// export const logout = ()=> {
-  
-
-//   return async function logoutThunk(dispatch:Dispatch) {
-//       try {
-//           const [logoutUser] = useLogoutMutation();
-//         const res =await logoutUser();
-//         if(res.error){
-//            alert("logout failed");
-           
-          
-//         }
-//         else {
-//            dispatch(setAuthCredentials(null));
-//            dispatch(setAccessToken(null));
-//            dispatch(setIsAuthenticated(false));
-//         }
-//       }
-//       catch(err) {
-//         alert("logout failed");
-//         console.error(err);
-//         return false;
-//       }
-//   }
-// }
 
 export const { setAuthCredentials, setAccessToken, clearAuth ,setIsAuthenticated, setRole} = authSlice.actions;
 export default authSlice.reducer;

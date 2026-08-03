@@ -21,6 +21,7 @@ import { useDispatch,useSelector } from 'react-redux';
 import { useLogoutMutation } from '../store/api/authApi';
 import { clearAuth } from '../store/slices/authSlice';
 
+
 const navItems: NavItem[] = [
   { icon: LayoutGrid, label: 'Dashboard' ,active: false},
   { icon: ArrowDownCircle, label: 'Income' , active: false},

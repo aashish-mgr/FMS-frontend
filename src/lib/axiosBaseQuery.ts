@@ -21,6 +21,25 @@ function unwrapResult(result: AxiosResponse, args: AxiosBaseQueryArgs) {
     return result;
   }
   return result.data?.data;
+
+}
+
+let refreshPromise: Promise<string> | null = null;
+
+function refreshAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post("http://localhost:3000/api/auth/refresh", {}, { withCredentials: true })
+      .then((res) => {
+        const token = res.data?.data?.accessToken;
+        if (!token) throw new Error("No access token in refresh response");
+        return token;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
 }
 
 export const axiosBaseQuery =
@@ -32,8 +51,7 @@ export const axiosBaseQuery =
   async (args, api) => {
     const state = api.getState() as RootState;
 
-    const token = state.auth.accessToken;
-   
+    const token = (state.auth as { accessToken?: string })?.accessToken;
     try {
       const result = await axiosInstance({
         url: args.url,
@@ -59,18 +77,9 @@ export const axiosBaseQuery =
 
       if (err.response?.status === 401) {
         try {
-          const refreshResponse = await axios.post(
-            "http://localhost:3000/api/auth/refresh",
-            {},
-            {
-              withCredentials: true,
-            }
-          );
+           const newAccessToken = await refreshAccessToken();
+    api.dispatch(setAccessToken(newAccessToken));
 
-          const newAccessToken =
-            (refreshResponse.data as any).accessToken;
-
-          api.dispatch(setAccessToken(newAccessToken));
 
           const retryResult = await axiosInstance({
             url: args.url,

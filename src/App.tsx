@@ -1,4 +1,7 @@
-import { BrowserRouter,Route,Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import { useEffect } from 'react'
+
 import Dashboard from './pages/accountant/Dashboard'
 import IncomePage from './pages/accountant/Income'
 import ExpensePage from './pages/accountant/Expense'
@@ -6,42 +9,47 @@ import NotesPage from './pages/accountant/Notes'
 import RemindersPage from './pages/accountant/Reminders'
 import AuditLog from './pages/accountant/AuditLog'
 import ReportsPage from './pages/accountant/Report'
-import store from './store'
-import { Provider } from 'react-redux'
-import { useEffect } from 'react'
+import Login from './pages/Login'
 
-
+import store, { type RootState, type AppDispatch } from './store'
+import { initializeAuth } from './store/slices/authSlice'
 
 import './App.css'
-import Login from './pages/Login'
-import { useRefreshMutation } from './store/api/authApi'
 
-function App() {
-  // const [refresh] = useRefreshMutation();
-  // useEffect(() => {
-  //    refresh();
-  // }, [])
-  
+function AppContent() {
+  const dispatch = useDispatch<AppDispatch>()
+  const isInitializing = useSelector((state: RootState) => state.auth.isInitializing)
+
+  useEffect(() => {
+    dispatch(initializeAuth())
+  }, [dispatch])
+
+  if (isInitializing) {
+    return <p>Loading...</p>
+  }
 
   return (
-    <>
-    <Provider store={store}>
     <BrowserRouter>
       <Routes>
-        <Route path='/' element= {<Login />}/>
-        <Route path='/dashboard' element= {<Dashboard />}/>
-        <Route path='/income' element= {<IncomePage />} />
-        <Route path='/expense' element= {<ExpensePage />} />
-        <Route path='/notes' element= {<NotesPage />} />
-        <Route path='/reminders' element= {<RemindersPage />} />
-        <Route path='/audit' element= {<AuditLog />} />
-        <Route path='/report' element= {<ReportsPage />} />
-        </Routes>
+        <Route path='/' element={<Login />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/income' element={<IncomePage />} />
+        <Route path='/expense' element={<ExpensePage />} />
+        <Route path='/notes' element={<NotesPage />} />
+        <Route path='/reminders' element={<RemindersPage />} />
+        <Route path='/audit' element={<AuditLog />} />
+        <Route path='/report' element={<ReportsPage />} />
+      </Routes>
     </BrowserRouter>
-    
-     </Provider>
-    </>
   )
 }
 
-export default App
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
+  )
+}
+
+export default App    
