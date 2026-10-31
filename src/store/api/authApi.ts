@@ -12,17 +12,28 @@ export interface loginData {
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
 
+export interface AuthTenant {
+  id: string;
+  name: string;
+  slug: string;
+  status: "TRIAL" | "ACTIVE" | "SUSPENDED" | "CANCELLED";
+  plan: string;
+}
+
 export interface AuthUser {
   id: string;
+  tenantId: string;
   userName: string;
   userEmail: string;
-  roles?: string;
+  role?: string | null;
+  roles?: string[];
 }
 
 
 interface LoginResponse {
   accessToken: string;
   user: AuthUser;
+  tenant: AuthTenant;
 }
 
 

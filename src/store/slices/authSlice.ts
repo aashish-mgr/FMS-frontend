@@ -47,7 +47,7 @@ const authSlice = createSlice({
     },
     setRole: (state, action: PayloadAction<string | undefined>) => {
       if (state.user) {
-        state.user.roles = action.payload;
+        state.user.role = action.payload ?? null;
       }
     },
     setAccessToken: (state, action: PayloadAction<string | null>) => {
@@ -59,6 +59,8 @@ const authSlice = createSlice({
     clearAuth: (state) => {
       state.user = null;
       state.accessToken = null;
+      state.isAuthenticated = false;
+      state.isInitializing = false;
     },
   },
   extraReducers: (builder) => {
