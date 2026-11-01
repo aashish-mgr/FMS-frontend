@@ -1,18 +1,26 @@
 import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { AuthUser } from "../api/authApi";
+import type { AuthTenant, AuthUser } from "../api/authApi";
 import axios from "axios";
 
 interface AuthState {
   user: AuthUser | null;
+  tenant: AuthTenant | null;
   accessToken: string | null;
   isAuthenticated: boolean;
   isInitializing: boolean;
 }
 
+interface RefreshResponse {
+  accessToken: string;
+  user: AuthUser;
+  tenant: AuthTenant;
+}
+
 
 const initialState: AuthState = {
   user: null,
+  tenant: null,
   accessToken: null,
   isAuthenticated: false,
   isInitializing: true
@@ -20,16 +28,18 @@ const initialState: AuthState = {
 
 export const initializeAuth = createAsyncThunk(
   "auth/initialize",
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
+      const response = await axios.post<{ data: RefreshResponse }>(
        "http://localhost:3000/api/auth/refresh",
         {},
         { withCredentials: true }
       );
-      const accessToken = response.data?.data?.accessToken;
-      if (!accessToken) throw new Error("No token in refresh response");
-      return accessToken;
+      const payload = response.data?.data;
+      if (!payload?.accessToken || !payload.user || !payload.tenant) {
+        throw new Error("No session in refresh response");
+      }
+      return payload;
     } catch (err) {
       return rejectWithValue(err);
     }
@@ -45,6 +55,9 @@ const authSlice = createSlice({
     setAuthCredentials: (state, action: PayloadAction<AuthUser | null >) => {
       state.user = action.payload;
     },
+    setWorkspace: (state, action: PayloadAction<AuthTenant | null>) => {
+      state.tenant = action.payload;
+    },
     setRole: (state, action: PayloadAction<string | undefined>) => {
       if (state.user) {
         state.user.role = action.payload ?? null;
@@ -58,6 +71,7 @@ const authSlice = createSlice({
     },
     clearAuth: (state) => {
       state.user = null;
+      state.tenant = null;
       state.accessToken = null;
       state.isAuthenticated = false;
       state.isInitializing = false;
@@ -66,11 +80,15 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(initializeAuth.fulfilled, (state, action) => {
-        state.accessToken = action.payload;
+        state.accessToken = action.payload.accessToken;
+        state.user = action.payload.user;
+        state.tenant = action.payload.tenant;
         state.isAuthenticated = true;
         state.isInitializing = false;
       })
       .addCase(initializeAuth.rejected, (state) => {
+        state.user = null;
+        state.tenant = null;
         state.accessToken = null;
         state.isAuthenticated = false;
         state.isInitializing = false;
@@ -80,5 +98,5 @@ const authSlice = createSlice({
 
 
 
-export const { setAuthCredentials, setAccessToken, clearAuth ,setIsAuthenticated, setRole} = authSlice.actions;
+export const { setAuthCredentials, setAccessToken, clearAuth ,setIsAuthenticated, setRole, setWorkspace} = authSlice.actions;
 export default authSlice.reducer;

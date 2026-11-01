@@ -10,6 +10,7 @@ import RemindersPage from './pages/accountant/Reminders'
 import AuditLog from './pages/accountant/AuditLog'
 import ReportsPage from './pages/accountant/Report'
 import Login from './pages/Login'
+import Signup from './pages/Signup'
 
 import store, { type RootState, type AppDispatch } from './store'
 import { initializeAuth } from './store/slices/authSlice'
@@ -32,6 +33,7 @@ function AppContent() {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/income' element={<IncomePage />} />
         <Route path='/expense' element={<ExpensePage />} />

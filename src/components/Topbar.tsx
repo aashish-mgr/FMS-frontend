@@ -13,10 +13,11 @@ const today = new Date('2026-07-14T00:00:00').toLocaleDateString('en-GB', {
 export default function Topbar() {
   const authState = useSelector((state: any)  => state.auth);
   const currentUser= authState?.user;
+  const workspaceName = authState?.tenant?.name;
   const initials = currentUser?.userName
-    .split(' ')
+    ?.split(' ')
     .map((n: any) => n[0])
-    .join('')
+    .join('') ?? ''
 
   return (
     <header className="sticky top-0 z-10 bg-paper/90 backdrop-blur border-b border-line">
@@ -42,7 +43,11 @@ export default function Topbar() {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-medium text-ink leading-none">{currentUser?.userName}</p>
-            <p className="text-[11px] text-muted mt-1">Logged in as {currentUser?.role}</p>
+            <p className="text-[11px] text-muted mt-1">
+              {workspaceName
+                ? `${workspaceName} · ${currentUser?.role ?? 'member'}`
+                : `Logged in as ${currentUser?.role ?? 'member'}`}
+            </p>
           </div>
           <div className="grid place-items-center w-9 h-9 rounded-full bg-indigo text-white text-xs font-semibold font-mono">
             {initials}

@@ -1,13 +1,15 @@
 
-
 export interface loginData {
     userEmail: string,
     userPassword: string
 }
 
-
-
-
+export interface RegisterData {
+  workspaceName: string;
+  userName: string;
+  userEmail: string;
+  userPassword: string;
+}
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
@@ -29,13 +31,11 @@ export interface AuthUser {
   roles?: string[];
 }
 
-
-interface LoginResponse {
+export interface LoginResponse {
   accessToken: string;
   user: AuthUser;
   tenant: AuthTenant;
 }
-
 
 export const authApi = createApi({
     reducerPath: "authApi",
@@ -48,6 +48,13 @@ export const authApi = createApi({
                 data: body
             }) 
         }),
+        register: builder.mutation<LoginResponse, RegisterData>({
+            query: (body) => ({
+                url: "/auth/register",
+                method: "POST",
+                data: body
+            })
+        }),
         logout: builder.mutation<{message: string},void> ({
             query: () => ({
                 url: "/auth/logout",
@@ -59,6 +66,4 @@ export const authApi = createApi({
 }) 
 
 
-export const {useLoginMutation, useLogoutMutation}= authApi;
-
-
+export const {useLoginMutation, useLogoutMutation, useRegisterMutation}= authApi;
