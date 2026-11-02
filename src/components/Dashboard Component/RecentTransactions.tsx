@@ -2,13 +2,11 @@ import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { npr } from '../../lib/format'
 import { formatDate } from '../../lib/format'
 import {useGetRecentTransactionsQuery} from '../../store/api/dashboardApi'
-import { useEffect, useState } from 'react'
-import type { Transaction } from '../../types/dashboardTypes'
 
 export default function RecentTransactions() {
   // const [recentTransactions, setRecentTransactions] = useState<Transaction[]>();
 
-   const {data: recentTransactions, refetch: refetchTransaction, isLoading} = useGetRecentTransactionsQuery();
+   const {data: recentTransactions, isLoading} = useGetRecentTransactionsQuery();
   // const getRecentTransactions = async () => {
   //    refetchTransaction();
   //    setRecentTransactions(transactionData);

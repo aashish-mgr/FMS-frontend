@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { ComponentType } from "react";
 import {
   Plus,
@@ -8,7 +8,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Paperclip,
   Download,
   ArrowUpRight,
   Receipt,
@@ -16,18 +15,15 @@ import {
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { npr } from "../../lib/format";
+import { usePermissions } from "../../lib/usePermissions";
 import { paymentMethods } from "../../types/ledgerTypes";
 import type {
-  ExpenseRecord,
   PaymentMethod,
   DateRange,
   AmountRange,
   ExportFormat,
 } from "../../types/ledgerTypes";
-import {
-  useGetExpenseCategoryQuery,
-  useGetIncomeCategoryQuery,
-} from "../../store/api/categoryApi";
+import { useGetExpenseCategoryQuery } from "../../store/api/categoryApi";
 import {
   useCreateMutation,
   useDeleteMutation,
@@ -135,12 +131,14 @@ export default function ExpensePage() {
     min: "",
     max: "",
   });
+  const { can } = usePermissions();
+  const canDelete = can("expense:delete");
 
    const [updateExpense]= useUpdateMutation();
    const [createExpense] = useCreateMutation();
    const [deleteExpense] = useDeleteMutation();
-  const {data: expenseCategories, refetch: refetchExpenseCategory} = useGetExpenseCategoryQuery();
-  const { data: records, refetch: refetchExpense, isLoading: expenseLoading } =  useGetAllQuery();
+  const {data: expenseCategories} = useGetExpenseCategoryQuery();
+  const { data: records, refetch: refetchExpense } = useGetAllQuery();
 
   const EMPTY_FORM: FormState = {
     transactionDate: TODAY,
@@ -603,13 +601,15 @@ export default function ExpensePage() {
                           >
                             <Pencil size={14} />
                           </button>
-                          <button
-                            onClick={() => setPendingDeleteId(r.id as string)}
-                            className="p-1.5 rounded-md text-muted hover:text-negative hover:bg-negative-soft"
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          {canDelete ? (
+                            <button
+                              onClick={() => setPendingDeleteId(r.id as string)}
+                              className="p-1.5 rounded-md text-muted hover:text-negative hover:bg-negative-soft"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -797,7 +797,7 @@ export default function ExpensePage() {
       )}
 
       {/* Delete confirm */}
-      {pendingDeleteId && (
+      {pendingDeleteId && canDelete && (
         <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-card rounded-xl border border-line shadow-panel p-6">
             <h2 className="font-display text-base font-semibold text-ink">

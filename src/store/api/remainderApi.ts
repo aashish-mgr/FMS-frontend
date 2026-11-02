@@ -27,7 +27,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
-import type { ListReminderParams,ListReminderResponse,CreateReminderInput,remainderType, UpdateReminderInput } from "../../types/remainderTypes";
+import type { ListReminderParams,CreateReminderInput,remainderType, UpdateReminderInput } from "../../types/remainderTypes";
 
 export const reminderApi = createApi({
   reducerPath: "reminderApi",

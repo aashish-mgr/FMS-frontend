@@ -3,7 +3,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import type { TooltipProps } from 'recharts'
 import { npr } from '../../lib/format'
 import { useGetMonthlyCashFlowQuery } from '../../store/api/dashboardApi'
-import type{ CashFlowDatum } from '../../types/dashboardTypes'
 
 
 const years = ['2026','2025']

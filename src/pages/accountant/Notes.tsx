@@ -3,7 +3,7 @@ import type { ComponentType } from 'react'
 import { Plus, Search, Pencil, Trash2, X, Pin, Archive, ArchiveRestore, StickyNote } from 'lucide-react'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import type { NoteRecord, ColorLabel, Note, UpdateNoteInput, CreateNoteInput } from '../../types/notesTypes'
+import type { ColorLabel, Note, UpdateNoteInput, CreateNoteInput } from '../../types/notesTypes'
 import { useCreateNoteMutation, useDeleteNoteMutation, useGetAllQuery, useToggleArchiveMutation, useTogglePinMutation, useUpdateNoteMutation } from '../../store/api/notesApi'
 
 type Tone = 'positive' | 'negative' | 'indigo' | 'amber'
@@ -76,7 +76,7 @@ function formatDate(iso: string) {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function NotesPage() { 
-  const {data: notes, isLoading } = useGetAllQuery()
+  const {data: notes } = useGetAllQuery()
    const [updateNote] = useUpdateNoteMutation();
    const [createNote] = useCreateNoteMutation();
    const [updatePin] = useTogglePinMutation();
@@ -138,8 +138,6 @@ export default function NotesPage() {
     const errors = validate(form)
     setFormErrors(errors)
     if (Object.keys(errors).length > 0) return
-
-    const now = new Date().toISOString()
 
     if (editingId) {
       updateNote({body: { title: form.title, description: form.description, colorLabel: form.colorLabel} as UpdateNoteInput ,id: editingId})

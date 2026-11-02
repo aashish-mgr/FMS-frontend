@@ -4,7 +4,6 @@ import { Download, ArrowDownRight, ArrowUpRight, TrendingUp, ChevronDown, Chevro
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { npr } from '../../lib/format'
-import { incomeCategories, expenseCategories, generateIncomeRecords, generateExpenseRecords } from '../../data/ledgerDummyData'
 import { paymentMethods } from '../../types/ledgerTypes'
 import type { PaymentMethod, ExportFormat } from '../../types/ledgerTypes'
 import { useGetExpenseCategoryQuery, useGetIncomeCategoryQuery } from '../../store/api/categoryApi'
@@ -12,7 +11,7 @@ import { useGetAllQuery  as getIncome} from '../../store/api/incomeApi'
 import { useGetAllQuery as getExpense } from '../../store/api/expenseApi'
 import type { Category } from '../../types/categoryTypes'
 import type { ReportType } from '../../types/reportTypes'
-import { useGetIncomeReportQuery, useGetExpenseReportQuery,useGetProfitLossReportQuery, useDownloadReportMutation } from '../../store/api/reportsApi'
+import { useDownloadReportMutation } from '../../store/api/reportsApi'
 
 type Tone = 'positive' | 'negative' | 'indigo' | 'amber'
 
@@ -266,8 +265,7 @@ export default function ReportsPage() {
   const pagedIncome = filteredIncome?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const pagedExpense = filteredExpense?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
-  const [downloadReport, { isLoading: isDownloading }] =
-    useDownloadReportMutation();
+  const [downloadReport] = useDownloadReportMutation();
 
   async function handleExport(format: ExportFormat) {
    try {

@@ -9,6 +9,7 @@ import { noteApi } from './api/notesApi';
 import { reminderApi } from './api/remainderApi';
 import { auditApi } from './api/auditApi';
 import { reportApi } from './api/reportsApi';
+import { workspaceApi } from './api/workspaceApi';
 const store = configureStore({
   reducer: {
    auth: authSlice,
@@ -21,6 +22,7 @@ const store = configureStore({
     [reminderApi.reducerPath]: reminderApi.reducer,
     [auditApi.reducerPath]: auditApi.reducer,
     [reportApi.reducerPath]: reportApi.reducer,
+    [workspaceApi.reducerPath]: workspaceApi.reducer,
   },
     middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -32,7 +34,8 @@ const store = configureStore({
       noteApi.middleware,
       reminderApi.middleware,
       auditApi.middleware,
-      reportApi.middleware
+      reportApi.middleware,
+      workspaceApi.middleware
     ),
 })
 

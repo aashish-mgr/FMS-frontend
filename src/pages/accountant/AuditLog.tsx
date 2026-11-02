@@ -6,6 +6,7 @@ import Topbar from '../../components/Topbar'
 import { AUDIT_ACTIONS, ENTITY_TYPES } from '../../types/auditTypes'
 import type { AuditLogRecord, AuditAction, EntityType, DateRange } from '../../types/auditTypes'
 import { useGetAllQuery } from '../../store/api/auditApi'
+import { usePermissions } from '../../lib/usePermissions'
 
 const PAGE_SIZE = 15
 const TODAY = new Date().toISOString().slice(0, 10)
@@ -84,7 +85,9 @@ function JsonBlock({ label, value }: { label: string; value: Record<string, unkn
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function AuditLog() {
-  const {data , refetch, isLoading} = useGetAllQuery(undefined,{refetchOnMountOrArgChange: true});
+  const { can } = usePermissions()
+  const canViewAudit = can('audit:read')
+  const {data , isLoading} = useGetAllQuery(undefined,{refetchOnMountOrArgChange: true, skip: !canViewAudit});
   const logs = data?.records;
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -113,7 +116,6 @@ export default function AuditLog() {
   const paged = filtered?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const todaysEventCount = logs?.filter((l) => l.createdAt.slice(0, 10) === TODAY).length
-  console.log(logs?.filter((l) => l.createdAt.slice(0, 10) === TODAY))
   const failedLoginCount = logs?.filter((l) => l.action === 'USER_LOGIN_FAILED').length
   const deletionCount = logs?.filter((l) => l.action.endsWith('DELETED')).length
 
@@ -126,6 +128,30 @@ export default function AuditLog() {
   }
 
   const hasActiveFilters = search || entityFilter !== 'all' || actionFilter !== 'all' || dateRange.from || dateRange.to
+
+  if (!canViewAudit) {
+    return (
+      <div className="flex min-h-screen bg-paper">
+        <Sidebar />
+        <div className="flex-1 min-w-0">
+          <Topbar />
+          <main className="px-5 lg:px-8 py-6">
+            <div className="mx-auto max-w-lg rounded-xl border border-line bg-card p-8 text-center shadow-card">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-negative-soft text-negative">
+                <ShieldAlert size={22} />
+              </div>
+              <h1 className="mt-4 font-display text-xl font-semibold text-ink">
+                Admin access required
+              </h1>
+              <p className="mt-2 text-sm text-muted">
+                Only workspace admins can view the audit trail.
+              </p>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-screen bg-paper">

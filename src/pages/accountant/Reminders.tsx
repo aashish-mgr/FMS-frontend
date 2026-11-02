@@ -8,7 +8,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Paperclip,
   CheckCircle2,
   Circle,
   AlarmClock,
@@ -18,7 +17,7 @@ import {
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { PRIORITIES, REPEAT_CYCLES } from '../../types/remainderTypes'
-import type { ReminderRecord, Priority, ReminderStatus, RepeatCycle, DateRange, remainderType } from '../../types/remainderTypes'
+import type { Priority, ReminderStatus, RepeatCycle, DateRange, remainderType } from '../../types/remainderTypes'
 import { useCreateReminderMutation, useDeleteReminderMutation, useGetRemindersQuery, useMarkCompleteMutation, useUpdateReminderMutation } from '../../store/api/remainderApi'
 
 const PAGE_SIZE = 10
@@ -104,7 +103,7 @@ function formatDate(iso: string) {
 /* ----------------------------------- Page ------------------------------------ */
 
 export default function RemindersPage() {
-  const {data: reminders, isLoading} = useGetRemindersQuery();
+  const {data: reminders} = useGetRemindersQuery();
   const [createReminder] = useCreateReminderMutation();
   const [updateReminder] = useUpdateReminderMutation();
   const [deleteReminder] = useDeleteReminderMutation();

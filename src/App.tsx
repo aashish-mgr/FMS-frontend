@@ -9,8 +9,11 @@ import NotesPage from './pages/accountant/Notes'
 import RemindersPage from './pages/accountant/Reminders'
 import AuditLog from './pages/accountant/AuditLog'
 import ReportsPage from './pages/accountant/Report'
+import MembersPage from './pages/accountant/Members'
+import WorkspaceSettings from './pages/accountant/WorkspaceSettings'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import AcceptInvitation from './pages/AcceptInvitation'
 
 import store, { type RootState, type AppDispatch } from './store'
 import { initializeAuth } from './store/slices/authSlice'
@@ -34,11 +37,14 @@ function AppContent() {
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
+        <Route path='/accept-invitation' element={<AcceptInvitation />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/income' element={<IncomePage />} />
         <Route path='/expense' element={<ExpensePage />} />
         <Route path='/notes' element={<NotesPage />} />
         <Route path='/reminders' element={<RemindersPage />} />
+        <Route path='/members' element={<MembersPage />} />
+        <Route path='/workspace-settings' element={<WorkspaceSettings />} />
         <Route path='/audit' element={<AuditLog />} />
         <Route path='/report' element={<ReportsPage />} />
       </Routes>

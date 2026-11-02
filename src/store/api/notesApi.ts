@@ -27,7 +27,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
-import type { Note,ListNoteParams,ListNoteResponse,CreateNoteInput, UpdateNoteInput } from "../../types/notesTypes";
+import type { Note,ListNoteParams,CreateNoteInput, UpdateNoteInput } from "../../types/notesTypes";
 
 
 export const noteApi = createApi({

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { npr } from '../../lib/format'
-import type { BarDatum,  BarRange } from '../../types/dashboardTypes'
+import type { BarRange } from '../../types/dashboardTypes'
 import {useGetIncomeExpenseChartQuery} from '../../store/api/dashboardApi'
 
 const toggles: { key: BarRange; label: string }[] = [
@@ -47,7 +47,7 @@ export default function IncomeExpenseChart() {
   const [range, setRange] = useState<BarRange>('monthly')
   // // const data = barChartData[range];
   // const [data, setData] = useState<BarDatum[]>()
-  const {data, refetch: refetchChart, isLoading} = useGetIncomeExpenseChartQuery(range)
+  const {data, isLoading} = useGetIncomeExpenseChartQuery(range)
   // const getBarData =async () => {
    
   //   refetchChart();

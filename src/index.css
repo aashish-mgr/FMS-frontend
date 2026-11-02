@@ -27,6 +27,12 @@ body {
   .bg-positive { background-color: #1e7f4e; }
   .bg-negative { background-color: #b23a2e; }
   .bg-amber { background-color: #b8860b; }
+  .bg-indigo { background-color: #4f5bd5; }
+  .bg-indigo-deep { background-color: #3d47b8; }
+  .bg-positive-soft { background-color: #e8f4ee; }
+  .bg-negative-soft { background-color: #faecea; }
+  .bg-indigo-soft { background-color: #eef0fa; }
+  .bg-amber-soft { background-color: #faf3df; }
 
   .text-ink { color: #12161c; }
   .text-muted { color: #6b6f76; }
@@ -34,6 +40,8 @@ body {
   .text-positive { color: #1e7f4e; }
   .text-negative { color: #b23a2e; }
   .text-amber { color: #b8860b; }
+  .text-indigo { color: #4f5bd5; }
+  .text-indigo-deep { color: #3d47b8; }
 
   .border-line { border-color: #e3e4dd; }
   .border-ink { border-color: #12161c; }

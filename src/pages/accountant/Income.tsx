@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import {
   Plus,
@@ -8,7 +8,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Paperclip,
   Download,
   ArrowDownRight,
   Receipt
@@ -16,11 +15,11 @@ import {
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
 import { npr } from '../../lib/format'
+import { usePermissions } from '../../lib/usePermissions'
 
 import { paymentMethods } from '../../types/ledgerTypes'
-import type { IncomeRecord, PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
+import type { PaymentMethod, DateRange, AmountRange, ExportFormat } from '../../types/ledgerTypes'
 import {useGetIncomeCategoryQuery} from '../../store/api/categoryApi'
-import type { Category } from '../../types/ledgerTypes'
 import {useCreateMutation,useDeleteMutation,useGetAllQuery,useUpdateMutation} from '../../store/api/incomeApi'
 import type { incomeType } from '../../types/incomeTypes'
 
@@ -97,9 +96,11 @@ export default function IncomePage() {
   const [paymentFilter, setPaymentFilter] = useState('all')
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
   const [amountRange, setAmountRange] = useState<AmountRange>({ min: '', max: '' })
+  const { can } = usePermissions()
+  const canDelete = can('income:delete')
   
 
-   const {data: incomeCategories, refetch: refetchIncomeCategory} = useGetIncomeCategoryQuery();
+   const {data: incomeCategories} = useGetIncomeCategoryQuery();
     const {data: records, refetch: refetchIncomeData} =  useGetAllQuery();
    
   const [createIncome] = useCreateMutation();
@@ -493,13 +494,15 @@ export default function IncomePage() {
                           <button onClick={() => openEdit(r)} className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-paper" title="Edit">
                             <Pencil size={14} />
                           </button>
-                          <button
-                            onClick={() => setPendingDeleteId(r.id)}
-                            className="p-1.5 rounded-md text-muted hover:text-negative hover:bg-negative-soft"
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          {canDelete ? (
+                            <button
+                              onClick={() => setPendingDeleteId(r.id)}
+                              className="p-1.5 rounded-md text-muted hover:text-negative hover:bg-negative-soft"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -671,7 +674,7 @@ export default function IncomePage() {
       )}
 
       {/* Delete confirm */}
-      {pendingDeleteId && (
+      {pendingDeleteId && canDelete && (
         <div className="fixed inset-0 z-50 bg-ink/40 flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-card rounded-xl border border-line shadow-panel p-6">
             <h2 className="font-display text-base font-semibold text-ink">Delete income record?</h2>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { ArrowDownRight, ArrowUpRight, TrendingUp } from 'lucide-react'
 import { kpiPeriods } from '../../types/dashboardTypes'
@@ -39,7 +39,7 @@ function HeroCard({ label, value, tone, Icon }: HeroCardProps) {
 
 export default function KpiSection() {
   // const [kpis, setKpis] = useState<Kpis>()
-  const {data: kpis, refetch: refetchKpi, isLoading} = useGetKpisQuery();
+  const {data: kpis, isLoading} = useGetKpisQuery();
   const [period, setPeriod] = useState<PeriodKey>('month')
   const active = kpis?.[period]
   const activeLabel = kpiPeriods.find((p) => p.key === period)!.label
