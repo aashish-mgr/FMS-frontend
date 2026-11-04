@@ -45,6 +45,14 @@ export interface WorkspaceInvitation {
   createdAt: string;
   invitedBy: { id: string; userName: string } | null;
   token?: string;
+  acceptUrl?: string;
+  emailSent?: boolean;
+}
+
+export interface CreatedInvitation extends WorkspaceInvitation {
+  token: string;
+  acceptUrl: string;
+  emailSent: boolean;
 }
 
 export interface InvitationDetails {

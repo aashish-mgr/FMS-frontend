@@ -23,9 +23,30 @@ const toneMap: Record<Tone, { text: string; bg: string; ring: string }> = {
 // Action key -> badge tone. CREATED = positive, UPDATED = amber, DELETED = negative,
 // auth events = indigo (failed login is the one exception -> negative).
 function actionTone(action: AuditAction): Tone {
-  if (action.endsWith('DELETED') || action === 'USER_LOGIN_FAILED') return 'negative'
-  if (action.endsWith('UPDATED')) return 'amber'
-  if (action.endsWith('CREATED') || action === 'ATTACHMENT_UPLOADED' || action === 'REMINDER_COMPLETED') return 'positive'
+  if (
+    action.endsWith('DELETED') ||
+    action === 'USER_LOGIN_FAILED' ||
+    action === 'MEMBER_REMOVED' ||
+    action.endsWith('REVOKED')
+  ) {
+    return 'negative'
+  }
+  if (
+    action.endsWith('UPDATED') ||
+    action === 'MEMBER_ROLE_CHANGED' ||
+    action.endsWith('RESENT')
+  ) {
+    return 'amber'
+  }
+  if (
+    action.endsWith('CREATED') ||
+    action === 'ATTACHMENT_UPLOADED' ||
+    action === 'REMINDER_COMPLETED' ||
+    action === 'MEMBER_INVITED' ||
+    action === 'MEMBER_JOINED'
+  ) {
+    return 'positive'
+  }
   return 'indigo'
 }
 

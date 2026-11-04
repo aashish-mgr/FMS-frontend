@@ -19,6 +19,12 @@ export type AuditAction =
   | 'REMINDER_CREATED'
   | 'REMINDER_COMPLETED'
   | 'REMINDER_DELETED'
+  | 'MEMBER_INVITED'
+  | 'MEMBER_JOINED'
+  | 'MEMBER_ROLE_CHANGED'
+  | 'MEMBER_REMOVED'
+  | 'MEMBER_INVITATION_REVOKED'
+  | 'MEMBER_INVITATION_RESENT'
 
 // SRS 14.2 — the full audited action list
 export const AUDIT_ACTIONS: AuditAction[] = [
@@ -38,12 +44,35 @@ export const AUDIT_ACTIONS: AuditAction[] = [
   'NOTE_DELETED',
   'REMINDER_CREATED',
   'REMINDER_COMPLETED',
-  'REMINDER_DELETED'
+  'REMINDER_DELETED',
+  'MEMBER_INVITED',
+  'MEMBER_JOINED',
+  'MEMBER_ROLE_CHANGED',
+  'MEMBER_REMOVED',
+  'MEMBER_INVITATION_REVOKED',
+  'MEMBER_INVITATION_RESENT'
 ]
 
-export type EntityType = 'income' | 'expense' | 'note' | 'reminder' | 'attachment' | 'user'
+export type EntityType =
+  | 'income'
+  | 'expense'
+  | 'note'
+  | 'reminder'
+  | 'attachment'
+  | 'user'
+  | 'invitation'
+  | 'workspace'
 
-export const ENTITY_TYPES: EntityType[] = ['income', 'expense', 'note', 'reminder', 'attachment', 'user']
+export const ENTITY_TYPES: EntityType[] = [
+  'income',
+  'expense',
+  'note',
+  'reminder',
+  'attachment',
+  'user',
+  'invitation',
+  'workspace'
+]
 
 // SRS 14.1 — Audit Log Table Schema
 export interface AuditLogRecord {

@@ -8,6 +8,7 @@ import {
   Crown,
   Mail,
   RefreshCw,
+  Send,
   ShieldCheck,
   Trash2,
   UserPlus,
@@ -25,11 +26,13 @@ import {
   useGetInvitationsQuery,
   useGetMembersQuery,
   useRemoveMemberMutation,
+  useResendInvitationMutation,
   useRevokeInvitationMutation,
   useUpdateMemberRoleMutation
 } from '../../store/api/workspaceApi'
 import type {
   AssignableRole,
+  CreatedInvitation,
   WorkspaceInvitation,
   WorkspaceMember
 } from '../../types/workspaceTypes'
@@ -71,6 +74,26 @@ function formatDateTime(value?: string | null) {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function formatExpiryHint(value?: string | null) {
+  if (!value) return ''
+  const expiresAt = new Date(value).getTime()
+  if (Number.isNaN(expiresAt)) return ''
+
+  const remainingMs = expiresAt - Date.now()
+  if (remainingMs <= 0) return 'Expired'
+
+  const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000))
+  if (remainingDays <= 1) return 'Expires within a day'
+  return `Expires in ${remainingDays} days`
+}
+
+function isInvitationExpired(invitation: WorkspaceInvitation) {
+  return (
+    invitation.status === 'EXPIRED' ||
+    new Date(invitation.expiresAt).getTime() <= Date.now()
+  )
 }
 
 function getInitials(name: string) {
@@ -138,6 +161,8 @@ export default function Members() {
 
   const [createInvitation, { isLoading: isCreatingInvitation }] =
     useCreateInvitationMutation()
+  const [resendInvitation, { isLoading: isResendingInvitation }] =
+    useResendInvitationMutation()
   const [updateMemberRole, { isLoading: isUpdatingRole }] =
     useUpdateMemberRoleMutation()
   const [removeMember, { isLoading: isRemovingMember }] =
@@ -149,8 +174,10 @@ export default function Members() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<AssignableRole>('accountant')
   const [inviteError, setInviteError] = useState<string | null>(null)
-  const [createdInvitation, setCreatedInvitation] = useState<
-    (WorkspaceInvitation & { token: string }) | null
+  const [createdInvitation, setCreatedInvitation] =
+    useState<CreatedInvitation | null>(null)
+  const [resendingInvitationId, setResendingInvitationId] = useState<
+    string | null
   >(null)
   const [copied, setCopied] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
@@ -167,9 +194,12 @@ export default function Members() {
     (member) =>
       member.roles.includes('admin') || member.roles.includes('superAdmin')
   ).length
-  const pendingInvitationCount = invitations.length
+  const pendingInvitationCount = invitations.filter(
+    (invitation) => !isInvitationExpired(invitation)
+  ).length
   const acceptUrl = createdInvitation
-    ? `${window.location.origin}/accept-invitation?token=${encodeURIComponent(
+    ? createdInvitation.acceptUrl ||
+      `${window.location.origin}/accept-invitation?token=${encodeURIComponent(
         createdInvitation.token
       )}`
     : ''
@@ -198,7 +228,9 @@ export default function Members() {
       setCopied(false)
       setCopyError(null)
       setActionMessage(
-        'Invitation created. Copy the link below and share it with the invitee.'
+        invitation.emailSent
+          ? `Invitation created and emailed to ${invitation.email}.`
+          : `Invitation created for ${invitation.email}. The email could not be sent automatically; copy the link below and share it manually.`
       )
     } catch (error) {
       setInviteError(
@@ -252,6 +284,30 @@ export default function Members() {
       setActionError(
         getApiErrorMessage(error, 'Could not revoke the invitation.')
       )
+    }
+  }
+
+  async function handleResend(invitation: WorkspaceInvitation) {
+    setActionError(null)
+    setActionMessage(null)
+    setResendingInvitationId(invitation.id)
+
+    try {
+      const refreshed = await resendInvitation(invitation.id).unwrap()
+      setCreatedInvitation(refreshed)
+      setCopied(false)
+      setCopyError(null)
+      setActionMessage(
+        refreshed.emailSent
+          ? `Invitation emailed again to ${refreshed.email}.`
+          : `New invitation link generated for ${refreshed.email}. The email could not be sent automatically; copy the link below and share it manually.`
+      )
+    } catch (error) {
+      setActionError(
+        getApiErrorMessage(error, 'Could not resend the invitation.')
+      )
+    } finally {
+      setResendingInvitationId(null)
     }
   }
 
@@ -525,10 +581,11 @@ export default function Members() {
               <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-line">
                 <div>
                   <h2 className="font-display text-base font-semibold text-ink">
-                    Pending invitations
+                    Invitations
                   </h2>
                   <p className="text-xs text-muted mt-0.5">
-                    Invitations expire after 7 days.
+                    Invitations expire after 7 days. Expired invitations can be
+                    resent.
                   </p>
                 </div>
                 <Mail size={18} className="text-muted" />
@@ -583,51 +640,96 @@ export default function Members() {
                           colSpan={5}
                           className="px-5 py-10 text-center text-muted"
                         >
-                          No pending invitations.
+                          No pending or expired invitations.
                         </td>
                       </tr>
                     ) : (
-                      invitations.map((invitation) => (
-                        <tr
-                          key={invitation.id}
-                          className="border-b border-line last:border-0"
-                        >
-                          <td className="px-5 py-4">
-                            <p className="font-medium text-ink">
-                              {invitation.email}
-                            </p>
-                            <p className="text-xs text-muted">
-                              Invited {formatDate(invitation.createdAt)}
-                            </p>
-                          </td>
-                          <td className="px-5 py-4">
-                            <span
-                              className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${
-                                roleTone[invitation.role] ??
-                                'bg-line text-muted'
-                              }`}
-                            >
-                              {formatRole(invitation.role)}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-sm text-muted">
-                            {invitation.invitedBy?.userName ?? '—'}
-                          </td>
-                          <td className="px-5 py-4 font-mono text-xs text-muted">
-                            {formatDateTime(invitation.expiresAt)}
-                          </td>
-                          <td className="px-5 py-4 text-right">
-                            <button
-                              onClick={() => handleRevoke(invitation)}
-                              disabled={isRevokingInvitation}
-                              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted hover:bg-negative-soft hover:text-negative transition-colors disabled:opacity-60"
-                            >
-                              <X size={14} />
-                              Revoke
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                      invitations.map((invitation) => {
+                        const expired = isInvitationExpired(invitation)
+
+                        return (
+                          <tr
+                            key={invitation.id}
+                            className="border-b border-line last:border-0"
+                          >
+                            <td className="px-5 py-4">
+                              <p className="font-medium text-ink">
+                                {invitation.email}
+                              </p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
+                                <span>
+                                  Invited {formatDate(invitation.createdAt)}
+                                </span>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                    expired
+                                      ? 'bg-negative-soft text-negative'
+                                      : 'bg-positive-soft text-positive'
+                                  }`}
+                                >
+                                  {expired ? 'Expired' : 'Pending'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium ${
+                                  roleTone[invitation.role] ??
+                                  'bg-line text-muted'
+                                }`}
+                              >
+                                {formatRole(invitation.role)}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-muted">
+                              {invitation.invitedBy?.userName ?? '—'}
+                            </td>
+                            <td className="px-5 py-4 text-muted">
+                              <p className="font-mono text-xs">
+                                {formatDateTime(invitation.expiresAt)}
+                              </p>
+                              <p className="mt-0.5 text-[11px]">
+                                {formatExpiryHint(invitation.expiresAt)}
+                              </p>
+                            </td>
+                            <td className="px-5 py-4 text-right">
+                              <div className="inline-flex items-center gap-1">
+                                <button
+                                  onClick={() => handleResend(invitation)}
+                                  disabled={
+                                    isResendingInvitation ||
+                                    isRevokingInvitation
+                                  }
+                                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted hover:bg-indigo-soft hover:text-indigo transition-colors disabled:opacity-60"
+                                >
+                                  {resendingInvitationId === invitation.id ? (
+                                    <RefreshCw
+                                      size={14}
+                                      className="animate-spin"
+                                    />
+                                  ) : (
+                                    <Send size={14} />
+                                  )}
+                                  Resend
+                                </button>
+                                {!expired ? (
+                                  <button
+                                    onClick={() => handleRevoke(invitation)}
+                                    disabled={
+                                      isRevokingInvitation ||
+                                      isResendingInvitation
+                                    }
+                                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted hover:bg-negative-soft hover:text-negative transition-colors disabled:opacity-60"
+                                  >
+                                    <X size={14} />
+                                    Revoke
+                                  </button>
+                                ) : null}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
                     )}
                   </tbody>
                 </table>
@@ -742,13 +844,28 @@ export default function Members() {
             </div>
 
             <div className="space-y-4 px-6 py-5">
-              <div className="flex items-start gap-2 rounded-lg border border-line bg-amber-soft px-3 py-2.5 text-sm text-amber">
-                <AlertTriangle size={16} className="mt-0.5 shrink-0" />
-                <span>
-                  This link is shown only once. Copy it now and send it to the
-                  invitee through your usual channel.
-                </span>
-              </div>
+              {createdInvitation.emailSent ? (
+                <div className="flex items-start gap-2 rounded-lg border border-line bg-positive-soft px-3 py-2.5 text-sm text-positive">
+                  <Check size={16} className="mt-0.5 shrink-0" />
+                  <span>
+                    Invitation email sent to {createdInvitation.email}. You can
+                    also share the link below.
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 rounded-lg border border-line bg-amber-soft px-3 py-2.5 text-sm text-amber">
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                  <span>
+                    The invitation email could not be sent automatically. Copy
+                    this link now and share it manually.
+                  </span>
+                </div>
+              )}
+
+              <p className="text-xs text-muted">
+                This link is shown only once. Resending creates a new link and
+                invalidates the previous one.
+              </p>
 
               <div>
                 <label className="text-xs font-medium text-muted">

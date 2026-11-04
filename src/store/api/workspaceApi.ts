@@ -4,6 +4,7 @@ import type {
   AcceptInvitationInput,
   AcceptInvitationResponse,
   CreateInvitationInput,
+  CreatedInvitation,
   InvitationDetails,
   UpdateWorkspaceInput,
   WorkspaceInvitation,
@@ -76,14 +77,19 @@ export const workspaceApi = createApi({
       providesTags: ["Invitations"],
     }),
 
-    createInvitation: builder.mutation<
-      WorkspaceInvitation & { token: string },
-      CreateInvitationInput
-    >({
+    createInvitation: builder.mutation<CreatedInvitation, CreateInvitationInput>({
       query: (body) => ({
         url: "/workspace/invitations",
         method: "POST",
         data: body,
+      }),
+      invalidatesTags: ["Invitations"],
+    }),
+
+    resendInvitation: builder.mutation<CreatedInvitation, string>({
+      query: (invitationId) => ({
+        url: `/workspace/invitations/${invitationId}/resend`,
+        method: "POST",
       }),
       invalidatesTags: ["Invitations"],
     }),
@@ -125,6 +131,7 @@ export const {
   useRemoveMemberMutation,
   useGetInvitationsQuery,
   useCreateInvitationMutation,
+  useResendInvitationMutation,
   useRevokeInvitationMutation,
   useGetInvitationByTokenQuery,
   useAcceptInvitationMutation,
