@@ -58,6 +58,9 @@ export default function Sidebar() {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   )
+  const workspaceName = useSelector(
+    (state: RootState) => state.auth.tenant?.name
+  )
   const { can, roles } = usePermissions()
 
   useEffect(() => {
@@ -89,16 +92,20 @@ export default function Sidebar() {
         )
         .join(' / ')
     : 'member'
+  const displayWorkspaceName = workspaceName?.trim() || 'Workspace'
 
   return (
     <aside className="hidden lg:flex w-64 shrink-0 flex-col bg-ink text-white/90 min-h-screen sticky top-0">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="grid place-items-center w-9 h-9 rounded-md bg-indigo">
+        <div className="grid place-items-center w-9 h-9 shrink-0 rounded-md bg-indigo">
           <BookOpen size={18} strokeWidth={2} className="text-white" />
         </div>
-        <div className="leading-tight">
-          <p className="font-display font-semibold text-[15px] text-white">
-            Digital Pathshala
+        <div className="min-w-0 leading-tight">
+          <p
+            className="truncate font-display font-semibold text-[15px] text-white"
+            title={displayWorkspaceName}
+          >
+            {displayWorkspaceName}
           </p>
           <p className="text-[11px] tracking-wide text-white/45 uppercase">
             Finance System

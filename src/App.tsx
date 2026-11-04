@@ -23,10 +23,16 @@ import './App.css'
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>()
   const isInitializing = useSelector((state: RootState) => state.auth.isInitializing)
+  const workspaceName = useSelector((state: RootState) => state.auth.tenant?.name)
 
   useEffect(() => {
     dispatch(initializeAuth())
   }, [dispatch])
+
+  useEffect(() => {
+    const name = workspaceName?.trim()
+    document.title = name ? `${name} · FMS` : 'FMS'
+  }, [workspaceName])
 
   if (isInitializing) {
     return <p>Loading...</p>
