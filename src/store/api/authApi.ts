@@ -25,6 +25,15 @@ export interface ChangePasswordData {
   newPassword: string;
 }
 
+export interface VerifyEmailData {
+  token: string;
+}
+
+export interface VerifyEmailResponse {
+  userId: string;
+  emailVerifiedAt: string;
+}
+
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
 
@@ -41,6 +50,7 @@ export interface AuthUser {
   tenantId: string;
   userName: string;
   userEmail: string;
+  emailVerifiedAt?: string | null;
   role?: string | null;
   roles?: string[];
 }
@@ -96,6 +106,19 @@ export const authApi = createApi({
                 data: body
             })
         }),
+        verifyEmail: builder.mutation<VerifyEmailResponse, VerifyEmailData>({
+            query: (body) => ({
+                url: "/auth/verify-email",
+                method: "POST",
+                data: body
+            })
+        }),
+        resendVerification: builder.mutation<{ emailSent: boolean }, void>({
+            query: () => ({
+                url: "/auth/resend-verification",
+                method: "POST"
+            })
+        }),
 
     })
 }) 
@@ -108,4 +131,6 @@ export const {
     useForgotPasswordMutation,
     useResetPasswordMutation,
     useChangePasswordMutation,
+    useVerifyEmailMutation,
+    useResendVerificationMutation,
 }= authApi;

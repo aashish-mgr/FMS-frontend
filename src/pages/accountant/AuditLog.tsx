@@ -35,6 +35,7 @@ function actionTone(action: AuditAction): Tone {
     action.endsWith('UPDATED') ||
     action === 'MEMBER_ROLE_CHANGED' ||
     action === 'PASSWORD_RESET_REQUESTED' ||
+    action === 'EMAIL_VERIFICATION_SENT' ||
     action.endsWith('RESENT')
   ) {
     return 'amber'
@@ -46,7 +47,8 @@ function actionTone(action: AuditAction): Tone {
     action === 'MEMBER_INVITED' ||
     action === 'MEMBER_JOINED' ||
     action === 'PASSWORD_CHANGED' ||
-    action === 'PASSWORD_RESET_COMPLETED'
+    action === 'PASSWORD_RESET_COMPLETED' ||
+    action === 'EMAIL_VERIFIED'
   ) {
     return 'positive'
   }

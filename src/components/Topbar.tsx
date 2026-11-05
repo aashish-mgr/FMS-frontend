@@ -1,6 +1,9 @@
-import { Search, Menu } from 'lucide-react'
+import { useState } from 'react'
+import { Search, Menu, MailWarning } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../store'
+import { useResendVerificationMutation } from '../store/api/authApi'
+import { getApiErrorMessage } from '../lib/getApiErrorMessage'
 
 const today = new Date().toLocaleDateString('en-GB', {
   weekday: 'long',
@@ -12,6 +15,9 @@ const today = new Date().toLocaleDateString('en-GB', {
 export default function Topbar() {
   const currentUser = useSelector((state: RootState) => state.auth.user)
   const workspaceName = useSelector((state: RootState) => state.auth.tenant?.name)
+  const [resendVerification, { isLoading: isResendingVerification }] =
+    useResendVerificationMutation()
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null)
   const roleLabel = currentUser?.roles?.length
     ? currentUser.roles
         .map((role) =>
@@ -26,6 +32,23 @@ export default function Topbar() {
       ?.split(' ')
       .map((n: string) => n[0])
       .join('') ?? ''
+
+  const handleResendVerification = async () => {
+    setVerificationMessage(null)
+
+    try {
+      const result = await resendVerification().unwrap()
+      setVerificationMessage(
+        result.emailSent
+          ? 'Verification email sent.'
+          : 'Email delivery is not configured right now. Ask a workspace admin for help.'
+      )
+    } catch (error) {
+      setVerificationMessage(
+        getApiErrorMessage(error, 'Could not send the verification email.')
+      )
+    }
+  }
 
   return (
     <header className="sticky top-0 z-10 bg-paper/90 backdrop-blur border-b border-line">
@@ -66,6 +89,24 @@ export default function Topbar() {
           </div>
         </div>
       </div>
+
+      {currentUser && !currentUser.emailVerifiedAt && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-amber/20 bg-amber-soft px-5 lg:px-8 py-2 text-xs text-amber">
+          <MailWarning size={14} />
+          <span>Verify your email to secure your account.</span>
+          <button
+            type="button"
+            onClick={handleResendVerification}
+            disabled={isResendingVerification}
+            className="font-semibold underline underline-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isResendingVerification ? 'Sending...' : 'Resend email'}
+          </button>
+          {verificationMessage && (
+            <span className="text-ink/70">{verificationMessage}</span>
+          )}
+        </div>
+      )}
     </header>
   )
 }
