@@ -85,6 +85,12 @@ export const authApi = createApi({
                 method: "POST"
             })
         }),
+        logoutAll: builder.mutation<{message: string},void> ({
+            query: () => ({
+                url: "/auth/logout-all",
+                method: "POST"
+            })
+        }),
         forgotPassword: builder.mutation<void, ForgotPasswordData>({
             query: (body) => ({
                 url: "/auth/forgot-password",
@@ -127,6 +133,7 @@ export const authApi = createApi({
 export const {
     useLoginMutation,
     useLogoutMutation,
+    useLogoutAllMutation,
     useRegisterMutation,
     useForgotPasswordMutation,
     useResetPasswordMutation,

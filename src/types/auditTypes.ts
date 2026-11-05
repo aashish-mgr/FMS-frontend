@@ -4,6 +4,7 @@
 export type AuditAction =
   | 'USER_LOGIN'
   | 'USER_LOGOUT'
+  | 'USER_LOGOUT_ALL'
   | 'USER_LOGIN_FAILED'
   | 'PASSWORD_CHANGED'
   | 'PASSWORD_RESET_REQUESTED'
@@ -35,6 +36,7 @@ export type AuditAction =
 export const AUDIT_ACTIONS: AuditAction[] = [
   'USER_LOGIN',
   'USER_LOGOUT',
+  'USER_LOGOUT_ALL',
   'USER_LOGIN_FAILED',
   'PASSWORD_CHANGED',
   'PASSWORD_RESET_REQUESTED',

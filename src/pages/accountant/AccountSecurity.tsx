@@ -1,11 +1,20 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/Sidebar'
 import Topbar from '../../components/Topbar'
-import { useChangePasswordMutation } from '../../store/api/authApi'
+import {
+  useChangePasswordMutation,
+  useLogoutAllMutation
+} from '../../store/api/authApi'
+import { clearAuth } from '../../store/slices/authSlice'
 import { getApiErrorMessage } from '../../lib/getApiErrorMessage'
 
 export default function AccountSecurity() {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [changePassword, { isLoading }] = useChangePasswordMutation()
+  const [logoutAll, { isLoading: isLoggingOutAll }] = useLogoutAllMutation()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -37,6 +46,21 @@ export default function AccountSecurity() {
       setSuccess('Your password has been changed.')
     } catch (err) {
       setError(getApiErrorMessage(err, 'Could not change your password. Please try again.'))
+    }
+  }
+
+  const handleLogoutAll = async () => {
+    if (!window.confirm('Log out of every device, including this one?')) {
+      return
+    }
+
+    try {
+      await logoutAll().unwrap()
+    } catch (error) {
+      console.error('Logout all failed:', error)
+    } finally {
+      dispatch(clearAuth())
+      navigate('/')
     }
   }
 
@@ -122,6 +146,21 @@ export default function AccountSecurity() {
               {isLoading ? 'Changing password...' : 'Change password'}
             </button>
           </form>
+
+          <section className="mt-5 bg-card border border-line rounded-xl p-5">
+            <h3 className="font-display text-base font-semibold text-ink">Active sessions</h3>
+            <p className="text-sm text-muted mt-1 mb-4">
+              Changing your password signs out other devices. You can also sign out every device manually.
+            </p>
+            <button
+              type="button"
+              onClick={handleLogoutAll}
+              disabled={isLoggingOutAll}
+              className="border border-negative/30 text-negative rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-negative-soft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoggingOutAll ? 'Signing out...' : 'Log out of all devices'}
+            </button>
+          </section>
         </main>
       </div>
     </div>
