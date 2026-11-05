@@ -6,6 +6,7 @@ import axiosInstance from "./axios";
 
 import type { RootState } from "../store";
 import { setAccessToken, clearAuth } from "../store/slices/authSlice";
+import { API_BASE_URL } from "./apiConfig";
 
 type AxiosBaseQueryArgs = {
   url: string;
@@ -29,7 +30,7 @@ let refreshPromise: Promise<string> | null = null;
 function refreshAccessToken(): Promise<string> {
   if (!refreshPromise) {
     refreshPromise = axios
-      .post("http://localhost:3000/api/auth/refresh", {}, { withCredentials: true })
+      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
       .then((res) => {
         const token = res.data?.data?.accessToken;
         if (!token) throw new Error("No access token in refresh response");

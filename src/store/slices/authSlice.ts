@@ -2,6 +2,7 @@ import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { AuthTenant, AuthUser } from "../api/authApi";
 import axios from "axios";
+import { API_BASE_URL } from "../../lib/apiConfig";
 
 interface AuthState {
   user: AuthUser | null;
@@ -31,7 +32,7 @@ export const initializeAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.post<{ data: RefreshResponse }>(
-       "http://localhost:3000/api/auth/refresh",
+        `${API_BASE_URL}/auth/refresh`,
         {},
         { withCredentials: true }
       );
