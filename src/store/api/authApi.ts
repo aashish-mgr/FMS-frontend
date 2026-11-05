@@ -11,6 +11,20 @@ export interface RegisterData {
   userPassword: string;
 }
 
+export interface ForgotPasswordData {
+  userEmail: string;
+}
+
+export interface ResetPasswordData {
+  token: string;
+  userPassword: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "../../lib/axiosBaseQuery";
 
@@ -61,9 +75,37 @@ export const authApi = createApi({
                 method: "POST"
             })
         }),
+        forgotPassword: builder.mutation<void, ForgotPasswordData>({
+            query: (body) => ({
+                url: "/auth/forgot-password",
+                method: "POST",
+                data: body
+            })
+        }),
+        resetPassword: builder.mutation<void, ResetPasswordData>({
+            query: (body) => ({
+                url: "/auth/reset-password",
+                method: "POST",
+                data: body
+            })
+        }),
+        changePassword: builder.mutation<void, ChangePasswordData>({
+            query: (body) => ({
+                url: "/auth/change-password",
+                method: "POST",
+                data: body
+            })
+        }),
 
     })
 }) 
 
 
-export const {useLoginMutation, useLogoutMutation, useRegisterMutation}= authApi;
+export const {
+    useLoginMutation,
+    useLogoutMutation,
+    useRegisterMutation,
+    useForgotPasswordMutation,
+    useResetPasswordMutation,
+    useChangePasswordMutation,
+}= authApi;

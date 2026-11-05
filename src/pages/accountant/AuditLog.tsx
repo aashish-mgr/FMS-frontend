@@ -34,6 +34,7 @@ function actionTone(action: AuditAction): Tone {
   if (
     action.endsWith('UPDATED') ||
     action === 'MEMBER_ROLE_CHANGED' ||
+    action === 'PASSWORD_RESET_REQUESTED' ||
     action.endsWith('RESENT')
   ) {
     return 'amber'
@@ -43,7 +44,9 @@ function actionTone(action: AuditAction): Tone {
     action === 'ATTACHMENT_UPLOADED' ||
     action === 'REMINDER_COMPLETED' ||
     action === 'MEMBER_INVITED' ||
-    action === 'MEMBER_JOINED'
+    action === 'MEMBER_JOINED' ||
+    action === 'PASSWORD_CHANGED' ||
+    action === 'PASSWORD_RESET_COMPLETED'
   ) {
     return 'positive'
   }

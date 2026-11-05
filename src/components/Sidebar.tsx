@@ -9,7 +9,8 @@ import {
   BookOpen,
   LogOut,
   Users,
-  Settings
+  Settings,
+  ShieldCheck
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -36,6 +37,11 @@ const navItems: NavItem[] = [
   { icon: BellRing, label: 'Reminders', path: '/reminders', badge: 7 },
   { icon: StickyNote, label: 'Notes', path: '/notes' },
   { icon: Users, label: 'Members', path: '/members', permission: 'member:read' },
+  {
+    icon: ShieldCheck,
+    label: 'Account Security',
+    path: '/account/security'
+  },
   {
     icon: Settings,
     label: 'Workspace Settings',

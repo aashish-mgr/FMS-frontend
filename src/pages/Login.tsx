@@ -94,7 +94,7 @@ const Login = () => {
           {isLoading ? "Logging in..." : "Login"}
         </button>
         <p className="m-2">
-          <Link to="/forgotPassword" className="text-blue-700 hover:underline">
+          <Link to="/forgot-password" className="text-blue-700 hover:underline">
             Forgot Password?
           </Link>
         </p>

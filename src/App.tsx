@@ -11,8 +11,11 @@ import AuditLog from './pages/accountant/AuditLog'
 import ReportsPage from './pages/accountant/Report'
 import MembersPage from './pages/accountant/Members'
 import WorkspaceSettings from './pages/accountant/WorkspaceSettings'
+import AccountSecurity from './pages/accountant/AccountSecurity'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import AcceptInvitation from './pages/AcceptInvitation'
 
 import store, { type RootState, type AppDispatch } from './store'
@@ -43,6 +46,8 @@ function AppContent() {
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/accept-invitation' element={<AcceptInvitation />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/income' element={<IncomePage />} />
@@ -51,6 +56,7 @@ function AppContent() {
         <Route path='/reminders' element={<RemindersPage />} />
         <Route path='/members' element={<MembersPage />} />
         <Route path='/workspace-settings' element={<WorkspaceSettings />} />
+        <Route path='/account/security' element={<AccountSecurity />} />
         <Route path='/audit' element={<AuditLog />} />
         <Route path='/report' element={<ReportsPage />} />
       </Routes>
